@@ -68,19 +68,19 @@
   }
   .edit-badge.show { display: block; }
 
-  /* 2. BOTONES: Historial | Borrar | Mic | Corregir | Enviar */
+  /* 2. BOTONES MÁS GRANDES */
   .controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
   .btn-side {
     flex: 1;
-    padding: 8px 6px;
-    font-size: 0.75rem;
+    padding: 12px 10px; /* MÁS GRANDE */
+    font-size: 0.9rem; /* MÁS GRANDE */
     border: none;
-    border-radius: 10px;
+    border-radius: 12px;
     cursor: pointer;
     font-weight: 600;
     background: #ffffff;
@@ -89,18 +89,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 6px;
     transition: transform 0.1s;
   }
   .btn-side:active { transform: scale(0.95); }
   .btn-mic {
-    width: 52px;
-    height: 52px;
+    width: 64px; /* MÁS GRANDE */
+    height: 64px; /* MÁS GRANDE */
     border-radius: 50%;
     border: none;
     background: #e74c3c;
     color: white;
-    font-size: 1.4rem;
+    font-size: 1.8rem; /* MÁS GRANDE */
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(231,76,60,0.4);
     display: flex;
@@ -137,9 +137,9 @@
   .contact-chip {
     background: #e8f4f8;
     color: #2980b9;
-    padding: 5px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
@@ -284,7 +284,7 @@
 
   <!-- 2. BOTONES -->
   <div class="controls">
-    <button class="btn-side" id="btnHistorial">📋 Historial</button>
+    <button class="btn-side" id="btnHistorial"> Historial</button>
     <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
     <button class="btn-mic" id="btnMic">🎤</button>
     <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
@@ -301,7 +301,7 @@
   <!-- 4. SLIDER PUBLICIDAD -->
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
-      <div class="ad-slide">📢 Espacio para Auto Publicidad 1</div>
+      <div class="ad-slide"> Espacio para Auto Publicidad 1</div>
       <div class="ad-slide">🎉 Promoción especial 2</div>
       <div class="ad-slide">⭐ Nuevo servicio disponible 3</div>
     </div>
@@ -352,6 +352,7 @@
   let isEditing = false;
   let recognition = null;
   let finalTranscript = '';
+  let currentFinal = '';
   let historial = [];
 
   // TOAST
@@ -361,38 +362,55 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  // WEB SPEECH API
+  // WEB SPEECH API - CORREGIDO
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.lang = 'es-ES';
-    recognition.continuous = true;
+    recognition.continuous = false; // CAMBIADO: false para evitar repetición
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
-      let interim = '';
+      let interimTranscript = '';
+      
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
+        
         if (event.results[i].isFinal) {
-          finalTranscript += transcript + ' ';
+          // Solo agregamos si es diferente al último final
+          if (transcript.trim() && transcript !== currentFinal) {
+            currentFinal = transcript;
+            finalTranscript = finalTranscript ? finalTranscript + ' ' + transcript : transcript;
+          }
         } else {
-          interim += transcript;
+          interimTranscript += transcript;
         }
       }
-      dialogText.textContent = finalTranscript + interim;
+      
+      // Mostramos el texto final + el interim actual
+      dialogText.textContent = finalTranscript + (interimTranscript ? ' ' + interimTranscript : '');
       dialogMeta.textContent = 'Escuchando...';
     };
 
     recognition.onerror = (event) => {
-      showToast('Error: ' + event.error);
+      console.error('Error:', event.error);
+      if (event.error !== 'no-speech') {
+        showToast('Error: ' + event.error);
+      }
       stopRecording();
     };
 
     recognition.onend = () => {
       if (isRecording) {
-        recognition.start(); // Reiniciar si sigue activo
-      } else {
-        stopRecording();
+        // Si hay texto final, lo guardamos
+        if (finalTranscript.trim()) {
+          stopRecording();
+        } else {
+          // Reiniciamos si no hay texto
+          setTimeout(() => {
+            if (isRecording) recognition.start();
+          }, 100);
+        }
       }
     };
   } else {
@@ -403,16 +421,29 @@
   function startRecording() {
     isRecording = true;
     finalTranscript = '';
+    currentFinal = '';
     btnMic.classList.add('recording');
     dialogMeta.textContent = 'Escuchando...';
-    if (recognition) recognition.start();
-    showToast('🎤 Grabando...');
+    dialogText.textContent = '';
+    if (recognition) {
+      try {
+        recognition.start();
+        showToast('🎤 Grabando...');
+      } catch(e) {
+        console.error(e);
+      }
+    }
   }
 
   function stopRecording() {
     isRecording = false;
     btnMic.classList.remove('recording');
-    if (recognition) recognition.stop();
+    if (recognition) {
+      try {
+        recognition.stop();
+      } catch(e) {}
+    }
+    
     if (finalTranscript.trim()) {
       historial.unshift({
         text: finalTranscript.trim(),
@@ -421,6 +452,7 @@
       dialogMeta.textContent = 'Transcripción corregida • ' + new Date().toLocaleTimeString();
       showToast('✅ Transcripción guardada');
     } else {
+      dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
     }
   }
@@ -439,6 +471,7 @@
     dialogText.textContent = 'Presioná el micrófono para empezar...';
     dialogMeta.textContent = 'Listo para dictar';
     finalTranscript = '';
+    currentFinal = '';
     if (isEditing) toggleEdit();
     showToast('🗑️ Texto borrado');
   });
@@ -462,8 +495,7 @@
   btnEnviar.addEventListener('click', () => {
     const text = dialogText.textContent.trim();
     if (text && text !== 'Presioná el micrófono para empezar...') {
-      showToast(' Enviado: "' + text.substring(0, 30) + '..."');
-      // Acá iría la lógica real de envío
+      showToast('📤 Enviado: "' + text.substring(0, 30) + '..."');
     } else {
       showToast('⚠️ No hay texto para enviar');
     }
@@ -480,7 +512,6 @@
           "${item.text}"
         </div>`
       ).join('');
-      // Click en item para cargarlo
       document.querySelectorAll('.modal-item').forEach(el => {
         el.addEventListener('click', () => {
           const idx = el.dataset.index;
@@ -488,7 +519,7 @@
           finalTranscript = historial[idx].text;
           dialogMeta.textContent = 'Cargado del historial • ' + historial[idx].time;
           modalHistorial.classList.remove('show');
-          showToast('📋 Texto cargado');
+          showToast(' Texto cargado');
         });
       });
     }
@@ -509,7 +540,7 @@
         showToast(`📅 Agendado a ${contact}: "${text.substring(0, 25)}..."`);
         setTimeout(() => chip.classList.remove('scheduled'), 2000);
       } else {
-        showToast('️ Primero dictá un mensaje');
+        showToast('⚠️ Primero dictá un mensaje');
       }
     });
   });
