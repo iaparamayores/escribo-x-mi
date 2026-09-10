@@ -33,12 +33,21 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
+    position: relative;
   }
   .dialog-text {
     font-size: 1.3rem;
     line-height: 1.5;
     color: #2c3e50;
     text-align: center;
+    outline: none;
+    min-height: 60px;
+  }
+  .dialog-text[contenteditable="true"] {
+    border: 2px dashed #3498db;
+    padding: 12px;
+    border-radius: 8px;
+    background: #f8f9fa;
   }
   .dialog-meta {
     font-size: 0.75rem;
@@ -46,20 +55,32 @@
     margin-top: 12px;
     text-align: right;
   }
+  .edit-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #3498db;
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: none;
+  }
+  .edit-badge.show { display: block; }
 
-  /* 2. BOTONES: Historial | Mic | Enviar */
+  /* 2. BOTONES: Historial | Borrar | Mic | Corregir | Enviar */
   .controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
   }
   .btn-side {
     flex: 1;
-    padding: 10px 14px;
-    font-size: 0.85rem;
+    padding: 8px 6px;
+    font-size: 0.75rem;
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     cursor: pointer;
     font-weight: 600;
     background: #ffffff;
@@ -68,24 +89,35 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
+    transition: transform 0.1s;
   }
+  .btn-side:active { transform: scale(0.95); }
   .btn-mic {
-    width: 56px;
-    height: 56px;
+    width: 52px;
+    height: 52px;
     border-radius: 50%;
     border: none;
     background: #e74c3c;
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.4rem;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(231,76,60,0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    transition: transform 0.2s;
   }
   .btn-mic:active { transform: scale(0.92); }
+  .btn-mic.recording {
+    animation: pulse 1s infinite;
+    background: #c0392b;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 4px 12px rgba(231,76,60,0.4); }
+    50% { box-shadow: 0 4px 24px rgba(231,76,60,0.8); }
+  }
 
   /* 3. BARRA AGENDAR CONTACTOS */
   .contacts-bar {
@@ -110,6 +142,12 @@
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
+    transition: background 0.2s;
+  }
+  .contact-chip:active { background: #d0e8f0; }
+  .contact-chip.scheduled {
+    background: #27ae60;
+    color: white;
   }
 
   /* 4. SLIDER DE PUBLICIDAD */
@@ -167,6 +205,70 @@
     color: #bdc3c7;
     letter-spacing: 0.5px;
   }
+
+  /* MODAL HISTORIAL */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 400px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+  .modal h3 {
+    margin-bottom: 16px;
+    color: #2c3e50;
+  }
+  .modal-item {
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+  .modal-item:active { background: #e9ecef; }
+  .modal-close {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* TOAST NOTIFICACIÓN */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #2c3e50;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 24px;
+    font-size: 0.85rem;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 200;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -175,22 +277,25 @@
 
   <!-- 1. CUADRO DE DIÁLOGO -->
   <div class="dialog-box">
-    <p class="dialog-text">"bueno Amelia vamos a ver cómo seguimos con esta comidita"</p>
-    <p class="dialog-meta">Transcripción corregida • 10:42 AM</p>
+    <div class="edit-badge" id="editBadge">✏️ Editando</div>
+    <p class="dialog-text" id="dialogText">Presioná el micrófono para empezar...</p>
+    <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
   </div>
 
   <!-- 2. BOTONES -->
   <div class="controls">
-    <button class="btn-side">📋 Historial</button>
-    <button class="btn-mic">🎤</button>
-    <button class="btn-side">Enviar </button>
+    <button class="btn-side" id="btnHistorial">📋 Historial</button>
+    <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
+    <button class="btn-mic" id="btnMic">🎤</button>
+    <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
+    <button class="btn-side" id="btnEnviar">Enviar ➤</button>
   </div>
 
   <!-- 3. AGENDAR CONTACTOS -->
   <div class="contacts-bar">
     <span>Agendar a:</span>
-    <div class="contact-chip">+ Amelia</div>
-    <div class="contact-chip">+ Nuevo</div>
+    <div class="contact-chip" data-contact="Amelia">+ Amelia</div>
+    <div class="contact-chip" data-contact="Nuevo">+ Nuevo</div>
   </div>
 
   <!-- 4. SLIDER PUBLICIDAD -->
@@ -212,13 +317,208 @@
 
 </div>
 
+<!-- MODAL HISTORIAL -->
+<div class="modal-overlay" id="modalHistorial">
+  <div class="modal">
+    <h3>📋 Historial de transcripciones</h3>
+    <div id="historialList">
+      <p style="color: #95a5a6; text-align: center;">Aún no hay transcripciones</p>
+    </div>
+    <button class="modal-close" id="modalClose">Cerrar</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
 <script>
-  // Slider automático de publicidad
+  // ELEMENTOS
+  const dialogText = document.getElementById('dialogText');
+  const dialogMeta = document.getElementById('dialogMeta');
+  const editBadge = document.getElementById('editBadge');
+  const btnMic = document.getElementById('btnMic');
+  const btnBorrar = document.getElementById('btnBorrar');
+  const btnCorregir = document.getElementById('btnCorregir');
+  const btnEnviar = document.getElementById('btnEnviar');
+  const btnHistorial = document.getElementById('btnHistorial');
+  const modalHistorial = document.getElementById('modalHistorial');
+  const modalClose = document.getElementById('modalClose');
+  const historialList = document.getElementById('historialList');
+  const toast = document.getElementById('toast');
+  const contactChips = document.querySelectorAll('.contact-chip');
+
+  // ESTADO
+  let isRecording = false;
+  let isEditing = false;
+  let recognition = null;
+  let finalTranscript = '';
+  let historial = [];
+
+  // TOAST
+  function showToast(msg) {
+    toast.textContent = msg;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 2500);
+  }
+
+  // WEB SPEECH API
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'es-ES';
+    recognition.continuous = true;
+    recognition.interimResults = true;
+
+    recognition.onresult = (event) => {
+      let interim = '';
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
+        if (event.results[i].isFinal) {
+          finalTranscript += transcript + ' ';
+        } else {
+          interim += transcript;
+        }
+      }
+      dialogText.textContent = finalTranscript + interim;
+      dialogMeta.textContent = 'Escuchando...';
+    };
+
+    recognition.onerror = (event) => {
+      showToast('Error: ' + event.error);
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      if (isRecording) {
+        recognition.start(); // Reiniciar si sigue activo
+      } else {
+        stopRecording();
+      }
+    };
+  } else {
+    dialogText.textContent = 'Tu navegador no soporta reconocimiento de voz.';
+    btnMic.disabled = true;
+  }
+
+  function startRecording() {
+    isRecording = true;
+    finalTranscript = '';
+    btnMic.classList.add('recording');
+    dialogMeta.textContent = 'Escuchando...';
+    if (recognition) recognition.start();
+    showToast('🎤 Grabando...');
+  }
+
+  function stopRecording() {
+    isRecording = false;
+    btnMic.classList.remove('recording');
+    if (recognition) recognition.stop();
+    if (finalTranscript.trim()) {
+      historial.unshift({
+        text: finalTranscript.trim(),
+        time: new Date().toLocaleTimeString()
+      });
+      dialogMeta.textContent = 'Transcripción corregida • ' + new Date().toLocaleTimeString();
+      showToast('✅ Transcripción guardada');
+    } else {
+      dialogMeta.textContent = 'Listo para dictar';
+    }
+  }
+
+  // MIC
+  btnMic.addEventListener('click', () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  });
+
+  // BORRAR
+  btnBorrar.addEventListener('click', () => {
+    dialogText.textContent = 'Presioná el micrófono para empezar...';
+    dialogMeta.textContent = 'Listo para dictar';
+    finalTranscript = '';
+    if (isEditing) toggleEdit();
+    showToast('🗑️ Texto borrado');
+  });
+
+  // CORREGIR (editar texto)
+  function toggleEdit() {
+    isEditing = !isEditing;
+    dialogText.contentEditable = isEditing;
+    editBadge.classList.toggle('show', isEditing);
+    if (isEditing) {
+      dialogText.focus();
+      showToast('✏️ Modo edición activado');
+    } else {
+      finalTranscript = dialogText.textContent;
+      showToast('✅ Cambios guardados');
+    }
+  }
+  btnCorregir.addEventListener('click', toggleEdit);
+
+  // ENVIAR
+  btnEnviar.addEventListener('click', () => {
+    const text = dialogText.textContent.trim();
+    if (text && text !== 'Presioná el micrófono para empezar...') {
+      showToast(' Enviado: "' + text.substring(0, 30) + '..."');
+      // Acá iría la lógica real de envío
+    } else {
+      showToast('⚠️ No hay texto para enviar');
+    }
+  });
+
+  // HISTORIAL
+  btnHistorial.addEventListener('click', () => {
+    if (historial.length === 0) {
+      historialList.innerHTML = '<p style="color: #95a5a6; text-align: center;">Aún no hay transcripciones</p>';
+    } else {
+      historialList.innerHTML = historial.map((item, i) => 
+        `<div class="modal-item" data-index="${i}">
+          <strong>${item.time}</strong><br>
+          "${item.text}"
+        </div>`
+      ).join('');
+      // Click en item para cargarlo
+      document.querySelectorAll('.modal-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const idx = el.dataset.index;
+          dialogText.textContent = historial[idx].text;
+          finalTranscript = historial[idx].text;
+          dialogMeta.textContent = 'Cargado del historial • ' + historial[idx].time;
+          modalHistorial.classList.remove('show');
+          showToast('📋 Texto cargado');
+        });
+      });
+    }
+    modalHistorial.classList.add('show');
+  });
+  modalClose.addEventListener('click', () => modalHistorial.classList.remove('show'));
+  modalHistorial.addEventListener('click', (e) => {
+    if (e.target === modalHistorial) modalHistorial.classList.remove('show');
+  });
+
+  // AGENDAR CONTACTOS
+  contactChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const contact = chip.dataset.contact;
+      const text = dialogText.textContent.trim();
+      if (text && text !== 'Presioná el micrófono para empezar...') {
+        chip.classList.add('scheduled');
+        showToast(`📅 Agendado a ${contact}: "${text.substring(0, 25)}..."`);
+        setTimeout(() => chip.classList.remove('scheduled'), 2000);
+      } else {
+        showToast('️ Primero dictá un mensaje');
+      }
+    });
+  });
+
+  // SLIDER PUBLICIDAD
   let currentSlide = 0;
   const slides = document.getElementById('adSlides');
   const dots = document.querySelectorAll('.ad-dot');
   const totalSlides = 3;
-
   setInterval(() => {
     currentSlide = (currentSlide + 1) % totalSlides;
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
