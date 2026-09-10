@@ -5,17 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Asistente de Voz</title>
 <style>
-  /* Reset y configuración para evitar scroll global */
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body, html {
-    height: 100dvh; /* Altura dinámica real de la pantalla */
-    overflow: hidden; /* Adios scroll */
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    background-color: #f4f5f7;
+    height: 100dvh;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #f0f2f5;
     color: #333;
   }
 
-  /* Contenedor principal (Flexbox vertical) */
   .app-container {
     display: flex;
     flex-direction: column;
@@ -24,20 +22,20 @@
     gap: 10px;
   }
 
-  /* 1. CUADRO DE DIÁLOGO (Más grande, ocupa el espacio disponible) */
+  /* 1. CUADRO DE DIÁLOGO GRANDE */
   .dialog-box {
-    flex: 1; /* Esto lo hace crecer para llenar el espacio */
+    flex: 1;
     background: #ffffff;
     border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
     justify-content: center;
-    overflow: hidden; /* Evita scroll interno si el texto es largo */
+    overflow: hidden;
   }
   .dialog-text {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     line-height: 1.5;
     color: #2c3e50;
     text-align: center;
@@ -49,30 +47,55 @@
     text-align: right;
   }
 
-  /* 2. ESPACIO PARA AUTO PUBLICIDAD */
-  .ad-space {
-    height: 60px;
-    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+  /* 2. BOTONES: Historial | Mic | Enviar */
+  .controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .btn-side {
+    flex: 1;
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    border: none;
     border-radius: 12px;
+    cursor: pointer;
+    font-weight: 600;
+    background: #ffffff;
+    color: #2c3e50;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #d35400;
-    border: 1px dashed #e67e22;
+    gap: 6px;
   }
+  .btn-mic {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: none;
+    background: #e74c3c;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .btn-mic:active { transform: scale(0.92); }
 
-  /* 3. BARRA PARA AGENDAR CONTACTOS */
+  /* 3. BARRA AGENDAR CONTACTOS */
   .contacts-bar {
-    height: 50px;
     background: #ffffff;
     border-radius: 12px;
-    padding: 0 15px;
+    padding: 10px 16px;
     display: flex;
     align-items: center;
     gap: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
   }
   .contacts-bar span {
     font-size: 0.85rem;
@@ -82,78 +105,126 @@
   .contact-chip {
     background: #e8f4f8;
     color: #2980b9;
-    padding: 4px 10px;
+    padding: 5px 12px;
     border-radius: 20px;
     font-size: 0.8rem;
-    font-weight: 500;
+    font-weight: 600;
     cursor: pointer;
   }
 
-  /* 4. CONTROLES / BOTONES (Más chicos) */
-  .controls {
+  /* 4. SLIDER DE PUBLICIDAD */
+  .ad-slider {
+    position: relative;
+    height: 70px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  }
+  .ad-slides {
     display: flex;
-    justify-content: center;
-    gap: 12px;
-    padding-top: 4px;
+    height: 100%;
+    transition: transform 0.4s ease;
   }
-  .btn {
-    padding: 8px 16px; /* Padding reducido */
-    font-size: 0.85rem; /* Texto más pequeño */
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: transform 0.1s;
-  }
-  .btn:active { transform: scale(0.95); }
-  .btn-mic {
-    background: #e74c3c;
-    color: white;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
+  .ad-slide {
+    min-width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    padding: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #fff;
   }
-  .btn-action {
-    background: #ecf0f1;
-    color: #2c3e50;
+  .ad-slide:nth-child(1) { background: linear-gradient(135deg, #fcb69f, #ffecd2); color: #d35400; }
+  .ad-slide:nth-child(2) { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); color: #2c3e50; }
+  .ad-slide:nth-child(3) { background: linear-gradient(135deg, #d4fc79, #96e6a1); color: #27ae60; }
+  .ad-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 6px;
+  }
+  .ad-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.5);
+    transition: background 0.3s;
+  }
+  .ad-dot.active { background: #fff; width: 18px; border-radius: 3px; }
+
+  /* 5. FOOTER */
+  .footer {
+    height: 32px;
+    background: #2c3e50;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: #bdc3c7;
+    letter-spacing: 0.5px;
   }
 </style>
 </head>
 <body>
 
 <div class="app-container">
-  
-  <!-- CUADRO DE DIÁLOGO GRANDE -->
+
+  <!-- 1. CUADRO DE DIÁLOGO -->
   <div class="dialog-box">
     <p class="dialog-text">"bueno Amelia vamos a ver cómo seguimos con esta comidita"</p>
     <p class="dialog-meta">Transcripción corregida • 10:42 AM</p>
   </div>
 
-  <!-- ESPACIO PUBLICIDAD -->
-  <div class="ad-space">
-    📢 Espacio para Auto Publicidad (Banner)
+  <!-- 2. BOTONES -->
+  <div class="controls">
+    <button class="btn-side">📋 Historial</button>
+    <button class="btn-mic">🎤</button>
+    <button class="btn-side">Enviar </button>
   </div>
 
-  <!-- AGENDAR CONTACTOS -->
+  <!-- 3. AGENDAR CONTACTOS -->
   <div class="contacts-bar">
     <span>Agendar a:</span>
     <div class="contact-chip">+ Amelia</div>
     <div class="contact-chip">+ Nuevo</div>
   </div>
 
-  <!-- BOTONES PEQUEÑOS -->
-  <div class="controls">
-    <button class="btn btn-action">📋 Historial</button>
-    <button class="btn btn-mic">🎤</button>
-    <button class="btn btn-action">Enviar ➤</button>
+  <!-- 4. SLIDER PUBLICIDAD -->
+  <div class="ad-slider">
+    <div class="ad-slides" id="adSlides">
+      <div class="ad-slide">📢 Espacio para Auto Publicidad 1</div>
+      <div class="ad-slide">🎉 Promoción especial 2</div>
+      <div class="ad-slide">⭐ Nuevo servicio disponible 3</div>
+    </div>
+    <div class="ad-dots" id="adDots">
+      <div class="ad-dot active"></div>
+      <div class="ad-dot"></div>
+      <div class="ad-dot"></div>
+    </div>
   </div>
 
+  <!-- 5. FOOTER -->
+  <div class="footer">© 2026 Asistente de Voz — Todos los derechos reservados</div>
+
 </div>
+
+<script>
+  // Slider automático de publicidad
+  let currentSlide = 0;
+  const slides = document.getElementById('adSlides');
+  const dots = document.querySelectorAll('.ad-dot');
+  const totalSlides = 3;
+
+  setInterval(() => {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+    dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+  }, 3500);
+</script>
 
 </body>
 </html>
