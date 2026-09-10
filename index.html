@@ -68,17 +68,25 @@
   }
   .edit-badge.show { display: block; }
 
-  /* 2. BOTONES MÁS GRANDES */
+  /* 2. BOTONES - TODOS DEL MISMO TAMAÑO */
   .controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 8px;
   }
-  .btn-side {
+  .btn-wrapper {
     flex: 1;
-    padding: 12px 10px; /* MÁS GRANDE */
-    font-size: 0.9rem; /* MÁS GRANDE */
+    display: flex;
+    justify-content: center;
+  }
+  .btn-wrapper.mic {
+    flex: 0 0 64px; /* Tamaño fijo para el mic */
+  }
+  .btn-side {
+    width: 100%;
+    padding: 14px 8px; /* MÁS ALTO */
+    font-size: 0.85rem;
     border: none;
     border-radius: 12px;
     cursor: pointer;
@@ -91,22 +99,23 @@
     justify-content: center;
     gap: 6px;
     transition: transform 0.1s;
+    white-space: nowrap;
+    min-height: 56px; /* Altura mínima fija */
   }
   .btn-side:active { transform: scale(0.95); }
   .btn-mic {
-    width: 64px; /* MÁS GRANDE */
-    height: 64px; /* MÁS GRANDE */
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     border: none;
     background: #e74c3c;
     color: white;
-    font-size: 1.8rem; /* MÁS GRANDE */
+    font-size: 1.8rem;
     cursor: pointer;
     box-shadow: 0 4px 12px rgba(231,76,60,0.4);
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
     transition: transform 0.2s;
   }
   .btn-mic:active { transform: scale(0.92); }
@@ -269,6 +278,25 @@
     pointer-events: none;
   }
   .toast.show { opacity: 1; }
+
+  /* INDICADOR DE ESPERA */
+  .waiting-indicator {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #f39c12;
+    color: white;
+    font-size: 0.7rem;
+    padding: 4px 10px;
+    border-radius: 12px;
+    display: none;
+    animation: blink 1s infinite;
+  }
+  .waiting-indicator.show { display: block; }
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+  }
 </style>
 </head>
 <body>
@@ -278,17 +306,28 @@
   <!-- 1. CUADRO DE DIÁLOGO -->
   <div class="dialog-box">
     <div class="edit-badge" id="editBadge">✏️ Editando</div>
+    <div class="waiting-indicator" id="waitingIndicator">⏱️ Esperando...</div>
     <p class="dialog-text" id="dialogText">Presioná el micrófono para empezar...</p>
     <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
   </div>
 
-  <!-- 2. BOTONES -->
+  <!-- 2. BOTONES - TODOS IGUALES -->
   <div class="controls">
-    <button class="btn-side" id="btnHistorial"> Historial</button>
-    <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
-    <button class="btn-mic" id="btnMic">🎤</button>
-    <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
-    <button class="btn-side" id="btnEnviar">Enviar ➤</button>
+    <div class="btn-wrapper">
+      <button class="btn-side" id="btnHistorial">📋 Historial</button>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
+    </div>
+    <div class="btn-wrapper mic">
+      <button class="btn-mic" id="btnMic">🎤</button>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
+    </div>
+    <div class="btn-wrapper">
+      <button class="btn-side" id="btnEnviar">Enviar ➤</button>
+    </div>
   </div>
 
   <!-- 3. AGENDAR CONTACTOS -->
@@ -336,6 +375,7 @@
   const dialogText = document.getElementById('dialogText');
   const dialogMeta = document.getElementById('dialogMeta');
   const editBadge = document.getElementById('editBadge');
+  const waitingIndicator = document.getElementById('waitingIndicator');
   const btnMic = document.getElementById('btnMic');
   const btnBorrar = document.getElementById('btnBorrar');
   const btnCorregir = document.getElementById('btnCorregir');
@@ -352,8 +392,11 @@
   let isEditing = false;
   let recognition = null;
   let finalTranscript = '';
-  let currentFinal = '';
+  let currentInterim = '';
   let historial = [];
+  let silenceTimer = null;
+  let lastSpeechTime = 0;
+  const SILENCE_DELAY = 3000; // 3 segundos de silencio antes de guardar
 
   // TOAST
   function showToast(msg) {
@@ -362,24 +405,26 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  // WEB SPEECH API - CORREGIDO
+  // WEB SPEECH API - CON DELAY
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
     recognition.lang = 'es-ES';
-    recognition.continuous = false; // CAMBIADO: false para evitar repetición
+    recognition.continuous = true; // IMPORTANTE: true para no cortar
     recognition.interimResults = true;
 
     recognition.onresult = (event) => {
+      lastSpeechTime = Date.now();
       let interimTranscript = '';
+      let hasFinal = false;
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const transcript = event.results[i][0].transcript;
         
         if (event.results[i].isFinal) {
-          // Solo agregamos si es diferente al último final
-          if (transcript.trim() && transcript !== currentFinal) {
-            currentFinal = transcript;
+          hasFinal = true;
+          // Agregamos solo si no está ya
+          if (transcript.trim() && !finalTranscript.includes(transcript.trim())) {
             finalTranscript = finalTranscript ? finalTranscript + ' ' + transcript : transcript;
           }
         } else {
@@ -387,9 +432,12 @@
         }
       }
       
-      // Mostramos el texto final + el interim actual
+      currentInterim = interimTranscript;
       dialogText.textContent = finalTranscript + (interimTranscript ? ' ' + interimTranscript : '');
       dialogMeta.textContent = 'Escuchando...';
+      
+      // Resetear timer de silencio cada vez que hay speech
+      resetSilenceTimer();
     };
 
     recognition.onerror = (event) => {
@@ -397,20 +445,19 @@
       if (event.error !== 'no-speech') {
         showToast('Error: ' + event.error);
       }
-      stopRecording();
+      // No paramos inmediatamente, dejamos que el timer decida
     };
 
     recognition.onend = () => {
+      // Si sigue grabando, reiniciamos
       if (isRecording) {
-        // Si hay texto final, lo guardamos
-        if (finalTranscript.trim()) {
-          stopRecording();
-        } else {
-          // Reiniciamos si no hay texto
-          setTimeout(() => {
-            if (isRecording) recognition.start();
-          }, 100);
-        }
+        setTimeout(() => {
+          if (isRecording) {
+            try {
+              recognition.start();
+            } catch(e) {}
+          }
+        }, 100);
       }
     };
   } else {
@@ -418,17 +465,60 @@
     btnMic.disabled = true;
   }
 
+  // Timer de silencio - espera 3 segundos antes de guardar
+  function resetSilenceTimer() {
+    if (silenceTimer) clearTimeout(silenceTimer);
+    waitingIndicator.classList.remove('show');
+    
+    if (isRecording) {
+      silenceTimer = setTimeout(() => {
+        // Verificamos si pasó el tiempo de silencio
+        const timeSinceLastSpeech = Date.now() - lastSpeechTime;
+        if (timeSinceLastSpeech >= SILENCE_DELAY - 100) {
+          waitingIndicator.classList.add('show');
+        }
+        if (timeSinceLastSpeech >= SILENCE_DELAY) {
+          // Guardamos automáticamente
+          if (finalTranscript.trim()) {
+            saveTranscription();
+          }
+        }
+      }, 100);
+    }
+  }
+
+  function saveTranscription() {
+    if (!finalTranscript.trim()) return;
+    
+    historial.unshift({
+      text: finalTranscript.trim(),
+      time: new Date().toLocaleTimeString()
+    });
+    
+    dialogMeta.textContent = 'Transcripción guardada • ' + new Date().toLocaleTimeString();
+    showToast('✅ Transcripción guardada automáticamente');
+    
+    // Limpiamos para la próxima
+    finalTranscript = '';
+    currentInterim = '';
+    if (silenceTimer) clearTimeout(silenceTimer);
+    waitingIndicator.classList.remove('show');
+  }
+
   function startRecording() {
     isRecording = true;
     finalTranscript = '';
-    currentFinal = '';
+    currentInterim = '';
+    lastSpeechTime = Date.now();
     btnMic.classList.add('recording');
-    dialogMeta.textContent = 'Escuchando...';
+    dialogMeta.textContent = 'Escuchando... (3s de silencio para guardar)';
     dialogText.textContent = '';
+    waitingIndicator.classList.remove('show');
+    
     if (recognition) {
       try {
         recognition.start();
-        showToast('🎤 Grabando...');
+        showToast('🎤 Grabando... hablá con calma');
       } catch(e) {
         console.error(e);
       }
@@ -438,26 +528,25 @@
   function stopRecording() {
     isRecording = false;
     btnMic.classList.remove('recording');
+    if (silenceTimer) clearTimeout(silenceTimer);
+    waitingIndicator.classList.remove('show');
+    
     if (recognition) {
       try {
         recognition.stop();
       } catch(e) {}
     }
     
+    // Guardamos lo que haya
     if (finalTranscript.trim()) {
-      historial.unshift({
-        text: finalTranscript.trim(),
-        time: new Date().toLocaleTimeString()
-      });
-      dialogMeta.textContent = 'Transcripción corregida • ' + new Date().toLocaleTimeString();
-      showToast('✅ Transcripción guardada');
+      saveTranscription();
     } else {
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
     }
   }
 
-  // MIC
+  // MIC - Click para empezar/parar
   btnMic.addEventListener('click', () => {
     if (isRecording) {
       stopRecording();
@@ -471,7 +560,9 @@
     dialogText.textContent = 'Presioná el micrófono para empezar...';
     dialogMeta.textContent = 'Listo para dictar';
     finalTranscript = '';
-    currentFinal = '';
+    currentInterim = '';
+    if (silenceTimer) clearTimeout(silenceTimer);
+    waitingIndicator.classList.remove('show');
     if (isEditing) toggleEdit();
     showToast('🗑️ Texto borrado');
   });
@@ -519,7 +610,7 @@
           finalTranscript = historial[idx].text;
           dialogMeta.textContent = 'Cargado del historial • ' + historial[idx].time;
           modalHistorial.classList.remove('show');
-          showToast(' Texto cargado');
+          showToast('📋 Texto cargado');
         });
       });
     }
