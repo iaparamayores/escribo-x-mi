@@ -3,188 +3,157 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Escribo x Mi</title>
-<meta name="theme-color" content="#7c3aed">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Escribo x Mi">
-<link rel="manifest" href="./manifest.json">
-<link rel="icon" type="image/png" href="./icon-192.png">
-<link rel="apple-touch-icon" href="./icon-512.png">
+<title>Asistente de Voz</title>
 <style>
-  :root { --primary:#7c3aed; --bg:#f5f3ff; --dark:#111827; --danger:#dc2626; }
-  *{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;}
-  html{font-size:18px;}
-  body{background:var(--bg);color:#1f2937;min-height:100vh;display:flex;flex-direction:column;}
-  header{background:var(--dark);color:#fff;padding:0.75rem 1rem;display:flex;align-items:center;justify-content:center;position:sticky;top:0;z-index:10;}
-  header h1{font-size:1.2rem;font-weight:700;}
-  main{flex:1;width:100%;max-width:600px;margin:0 auto;padding:0.75rem;display:flex;flex-direction:column;gap:0.75rem;}
-  .estado{text-align:center;font-size:1rem;font-weight:600;color:#4b5563;min-height:1.5rem;}
-  .estado.escuchando{color:var(--danger);}
-  #btn-mic{width:110px;height:110px;border-radius:50%;border:6px solid #ddd6fe;background:var(--primary);color:#fff;font-size:2.6rem;cursor:pointer;margin:0 auto;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(124,58,237,.35);transition:transform .15s;}
-  #btn-mic:active{transform:scale(.95);}
-  #btn-mic.escuchando{background:var(--danger);border-color:#fecaca;animation:pulso 1.2s infinite;}
-  @keyframes pulso{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.45);}50%{box-shadow:0 0 0 18px rgba(220,38,38,0);}}
-  #texto{width:100%;min-height:220px;padding:0.9rem;border:2px solid #ddd6fe;border-radius:1rem;font-size:1.45rem;line-height:1.5;background:#fff;color:#111827;}
-  #texto:focus{outline:3px solid #c4b5fd;}
-  .interim{font-size:0.95rem;color:#7c3aed;font-style:italic;min-height:1.3rem;text-align:center;}
-  .acciones{display:grid;grid-template-columns:1fr 1fr;gap:0.6rem;}
-  .btn-accion{border:none;border-radius:1rem;padding:1rem 0.5rem;font-size:1.05rem;font-weight:700;color:#fff;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0.3rem;}
-  .btn-accion .ico{font-size:1.6rem;}
-  .btn-copiar{background:#2563eb;}
-  .btn-wa{background:#25d366;}
-  .btn-mail{background:#0ea5e9;}
-  .btn-oir{background:#7c3aed;}
-  .btn-borrar{background:#6b7280;grid-column:span 2;}
-  #btn-familiar{display:none;width:100%;border:none;border-radius:1rem;padding:0.9rem;background:#059669;color:#fff;font-size:1.05rem;font-weight:700;cursor:pointer;}
-  footer{text-align:center;padding:0.2rem 0.5rem;background:var(--dark);color:#9ca3af;font-size:0.7rem;border-top:1px solid var(--primary);line-height:1.2;}
-  footer a{color:#a78bfa;font-weight:600;text-decoration:none;}
-  #toast{position:fixed;bottom:4.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:#111827;color:#fff;padding:0.7rem 1.4rem;border-radius:2rem;font-size:0.95rem;font-weight:600;opacity:0;transition:all .4s;z-index:50;white-space:nowrap;}
-  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* Reset y configuración para evitar scroll global */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body, html {
+    height: 100dvh; /* Altura dinámica real de la pantalla */
+    overflow: hidden; /* Adios scroll */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f5f7;
+    color: #333;
+  }
+
+  /* Contenedor principal (Flexbox vertical) */
+  .app-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  /* 1. CUADRO DE DIÁLOGO (Más grande, ocupa el espacio disponible) */
+  .dialog-box {
+    flex: 1; /* Esto lo hace crecer para llenar el espacio */
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden; /* Evita scroll interno si el texto es largo */
+  }
+  .dialog-text {
+    font-size: 1.25rem;
+    line-height: 1.5;
+    color: #2c3e50;
+    text-align: center;
+  }
+  .dialog-meta {
+    font-size: 0.75rem;
+    color: #95a5a6;
+    margin-top: 12px;
+    text-align: right;
+  }
+
+  /* 2. ESPACIO PARA AUTO PUBLICIDAD */
+  .ad-space {
+    height: 60px;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #d35400;
+    border: 1px dashed #e67e22;
+  }
+
+  /* 3. BARRA PARA AGENDAR CONTACTOS */
+  .contacts-bar {
+    height: 50px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .contacts-bar span {
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    white-space: nowrap;
+  }
+  .contact-chip {
+    background: #e8f4f8;
+    color: #2980b9;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  /* 4. CONTROLES / BOTONES (Más chicos) */
+  .controls {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding-top: 4px;
+  }
+  .btn {
+    padding: 8px 16px; /* Padding reducido */
+    font-size: 0.85rem; /* Texto más pequeño */
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.1s;
+  }
+  .btn:active { transform: scale(0.95); }
+  .btn-mic {
+    background: #e74c3c;
+    color: white;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    padding: 0;
+  }
+  .btn-action {
+    background: #ecf0f1;
+    color: #2c3e50;
+  }
 </style>
 </head>
 <body>
-<header><h1>✍️ Escribo x Mi</h1></header>
-<main>
-  <p class="estado" id="estado">Tocá el micrófono y hablá despacio</p>
-  <button id="btn-mic" onclick="alternarMic()">🎙️</button>
-  <p class="interim" id="interim"></p>
-  <textarea id="texto" placeholder="Acá aparece lo que decís. Podés tocar cualquier palabra para corregirla con el teclado."></textarea>
-  <button id="btn-familiar"></button>
-  <div class="acciones">
-    <button class="btn-accion btn-wa" onclick="mandarWA()"><span class="ico">💬</span>WhatsApp</button>
-    <button class="btn-accion btn-mail" onclick="mandarMail()"><span class="ico">✉️</span>Email</button>
-    <button class="btn-accion btn-copiar" onclick="copiarTexto()"><span class="ico">📋</span>Copiar</button>
-    <button class="btn-accion btn-oir" onclick="escucharTexto()"><span class="ico">🔊</span>Escuchar</button>
-    <button class="btn-accion btn-borrar" onclick="borrarTexto()"><span class="ico">🗑️</span>Borrar todo</button>
+
+<div class="app-container">
+  
+  <!-- CUADRO DE DIÁLOGO GRANDE -->
+  <div class="dialog-box">
+    <p class="dialog-text">"bueno Amelia vamos a ver cómo seguimos con esta comidita"</p>
+    <p class="dialog-meta">Transcripción corregida • 10:42 AM</p>
   </div>
-</main>
-<footer>Sugerencias a: <a href="mailto:iaparamayoresapp@gmail.com">iaparamayoresapp@gmail.com</a></footer>
-<div id="toast"></div>
-<script>
-const estado=document.getElementById('estado');
-const interim=document.getElementById('interim');
-const caja=document.getElementById('texto');
-const btnMic=document.getElementById('btn-mic');
-let escuchando=false;
-let rec=null;
 
-const storageOK=(()=>{try{const t='__t__';localStorage.setItem(t,t);localStorage.removeItem(t);return true;}catch(e){return false;}})();
-function guardarD(k,v){if(storageOK)try{localStorage.setItem(k,v);}catch(e){}}
-function obtenerD(k,d=''){if(storageOK)try{return localStorage.getItem(k)||d;}catch(e){return d;}return d;}
+  <!-- ESPACIO PUBLICIDAD -->
+  <div class="ad-space">
+    📢 Espacio para Auto Publicidad (Banner)
+  </div>
 
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+  <!-- AGENDAR CONTACTOS -->
+  <div class="contacts-bar">
+    <span>Agendar a:</span>
+    <div class="contact-chip">+ Amelia</div>
+    <div class="contact-chip">+ Nuevo</div>
+  </div>
 
-function crearRec(){
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR)return null;
-  const r=new SR();
-  r.lang='es-ES';
-  r.interimResults=true;
-  r.continuous=true;
-  r.onresult=e=>{
-    let inter='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
-      const t=e.results[i][0].transcript;
-      if(e.results[i].isFinal){
-        caja.value=(caja.value?caja.value.replace(/\s*$/,'')+' ':'')+t.trim()+' ';
-        guardarD('escribo_borrador',caja.value);
-      } else inter+=t;
-    }
-    interim.textContent=inter?('…'+inter):'';
-  };
-  r.onerror=e=>{
-    if(e.error==='not-allowed'){toast('Permiso de micrófono denegado');pararMic();}
-  };
-  r.onend=()=>{
-    if(escuchando){try{r.start();}catch(e){}}
-    else interim.textContent='';
-  };
-  return r;
-}
-function alternarMic(){escuchando?pararMic():iniciarMic();}
-function iniciarMic(){
-  if(!rec)rec=crearRec();
-  if(!rec){toast('Tu navegador no soporta dictado');return;}
-  if(!navigator.onLine){toast('El dictado necesita internet');return;}
-  escuchando=true;
-  btnMic.classList.add('escuchando');
-  btnMic.textContent='🛑';
-  estado.textContent='Escuchando... tocá 🛑 para terminar';
-  estado.classList.add('escuchando');
-  try{rec.start();}catch(e){}
-}
-function pararMic(){
-  escuchando=false;
-  if(rec){try{rec.stop();}catch(e){}}
-  btnMic.classList.remove('escuchando');
-  btnMic.textContent='🎙️';
-  estado.textContent='Listo. Revisá, corregí y mandá';
-  estado.classList.remove('escuchando');
-  interim.textContent='';
-}
+  <!-- BOTONES PEQUEÑOS -->
+  <div class="controls">
+    <button class="btn btn-action">📋 Historial</button>
+    <button class="btn btn-mic">🎤</button>
+    <button class="btn btn-action">Enviar ➤</button>
+  </div>
 
-function copiarTexto(){
-  const t=caja.value.trim();
-  if(!t){toast('No hay nada para copiar');return;}
-  if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(t).then(()=>toast('📋 Copiado')).catch(()=>copiarFallback(t));
-  }else copiarFallback(t);
-}
-function copiarFallback(t){
-  caja.focus();caja.select();
-  try{document.execCommand('copy');toast('📋 Copiado');}catch(e){toast('No se pudo copiar');}
-  caja.setSelectionRange(0,0);caja.blur();
-}
-function mandarWA(){
-  const t=caja.value.trim();
-  if(!t){toast('Primero dictá o escribí algo');return;}
-  window.open('https://wa.me/?text='+encodeURIComponent(t),'_blank');
-}
-function mandarMail(){
-  const t=caja.value.trim();
-  if(!t){toast('Primero dictá o escribí algo');return;}
-  location.href='mailto:?subject='+encodeURIComponent('Mensaje')+'&body='+encodeURIComponent(t);
-}
-function escucharTexto(){
-  const t=caja.value.trim();
-  if(!t){toast('No hay nada para escuchar');return;}
-  try{
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(t);
-    u.lang='es-ES';u.rate=0.95;
-    speechSynthesis.speak(u);
-    toast('🔊 Leyendo en voz alta');
-  }catch(e){toast('Tu celu no puede leer en voz alta');}
-}
-function borrarTexto(){
-  caja.value='';
-  interim.textContent='';
-  guardarD('escribo_borrador','');
-  toast('🗑️ Borrado, empezamos de nuevo');
-}
+</div>
 
-// Borrador que no se pierde
-caja.addEventListener('input',()=>guardarD('escribo_borrador',caja.value));
-caja.value=obtenerD('escribo_borrador','');
-
-// Suite: si Círculo Vital tiene la ficha, ofrecer envío directo al familiar
-try{
-  const ficha=JSON.parse(localStorage.getItem('circulo_ficha')||'{}');
-  if(ficha&&ficha.familiar){
-    const b=document.getElementById('btn-familiar');
-    b.textContent='💚 Mandar directo a mi familiar';
-    b.style.display='block';
-    b.onclick=()=>{
-      const t=caja.value.trim();
-      if(!t){toast('Primero dictá o escribí algo');return;}
-      window.open('https://wa.me/'+ficha.familiar+'?text='+encodeURIComponent(t),'_blank');
-    };
-  }
-}catch(e){}
-
-if('serviceWorker' in navigator&&location.protocol==='https:'){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('./service-worker.js').catch(e=>console.log(e)));
-}
-</script>
 </body>
 </html>
