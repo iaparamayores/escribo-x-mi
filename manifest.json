@@ -1,0 +1,14 @@
+{
+  "name": "Escribo x Mi — Dictá, corregí y mandá",
+  "short_name": "Escribo x Mi",
+  "description": "Dictá con tu voz, corregí con letras grandes y mandá por WhatsApp o email sin apuros.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f3ff",
+  "theme_color": "#7c3aed",
+  "icons": [
+    { "src": "./icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
