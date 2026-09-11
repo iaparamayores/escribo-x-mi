@@ -262,6 +262,44 @@
     pointer-events: none; text-align: center; width: 90%;
   }
   .toast.show { opacity: 1; }
+  
+  /* BOTÓN DE CANCELAR GRABACIÓN */
+  .btn-cancelar-grabacion {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: #95a5a6;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .btn-cancelar-grabacion.show { display: flex; }
+  
+  /* BOTÓN LISTO EDICIÓN */
+  .btn-listo-edicion {
+    position: absolute;
+    top: 12px;
+    right: 60px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+  }
+  .btn-listo-edicion.show { display: flex; }
 </style>
 </head>
 <body>
@@ -269,6 +307,8 @@
 <div class="app-container">
   <div class="dialog-box">
     <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
+    <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion">✖ Cancelar</button>
+    <button class="btn-listo-edicion" id="btnListoEdicion">✓ Listo</button>
     <div class="edit-badge" id="editBadge">✏️ Editando</div>
     <p class="dialog-text" id="dialogText">Presioná el micrófono para empezar...</p>
     <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
@@ -277,7 +317,7 @@
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHistorial">📋 Historial</button>
+        <button class="btn-side" id="btnHistorial"> Historial</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
@@ -299,7 +339,7 @@
   <div class="contacts-bar">
     <div class="contacts-left">
       <span>Agendar a:</span>
-      <div class="contact-chip" id="btnGestionarContactos"> Contactos</div>
+      <div class="contact-chip" id="btnGestionarContactos">👥 Contactos</div>
     </div>
     <div class="selected-contact" id="selectedContactDisplay"></div>
   </div>
@@ -323,7 +363,7 @@
 <!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
-    <h3>📋 Historial de transcripciones</h3>
+    <h3> Historial de transcripciones</h3>
     <div id="historialList"></div>
     <button class="modal-close" id="historialClose">Cerrar</button>
   </div>
@@ -332,7 +372,7 @@
 <!-- MODAL CONTACTOS -->
 <div class="modal-overlay" id="modalContactos">
   <div class="modal">
-    <h3> Gestionar Contactos</h3>
+    <h3>👥 Gestionar Contactos</h3>
     <div class="contact-form">
       <div class="form-group">
         <label>Nombre:</label>
@@ -348,7 +388,7 @@
       </div>
       <button class="btn-save" id="btnGuardarContacto">💾 Guardar Contacto</button>
     </div>
-    <h4 style="margin: 16px 0 8px; color: #2c3e50;"> Contactos guardados:</h4>
+    <h4 style="margin: 16px 0 8px; color: #2c3e50;">📇 Contactos guardados:</h4>
     <div class="contact-list" id="contactList"></div>
     <button class="modal-close" id="contactosClose">Cerrar</button>
   </div>
@@ -370,7 +410,7 @@
         <span>✉️</span><div><div>Email</div><small style="font-weight: normal; font-size: 0.8rem;">Abrir cliente de correo</small></div>
       </div>
       <div class="send-option copy" id="sendCopy">
-        <span>📋</span><div><div>Copiar al portapapeles</div><small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small></div>
+        <span></span><div><div>Copiar al portapapeles</div><small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small></div>
       </div>
     </div>
     <button class="modal-close" id="enviarClose">Cancelar</button>
@@ -390,6 +430,8 @@
   const btnEnviar = document.getElementById('btnEnviar');
   const btnHistorial = document.getElementById('btnHistorial');
   const btnSalir = document.getElementById('btnSalir');
+  const btnCancelarGrabacion = document.getElementById('btnCancelarGrabacion');
+  const btnListoEdicion = document.getElementById('btnListoEdicion');
   const btnGestionarContactos = document.getElementById('btnGestionarContactos');
   const selectedContactDisplay = document.getElementById('selectedContactDisplay');
   const modalHistorial = document.getElementById('modalHistorial');
@@ -412,13 +454,36 @@
   let contactoSeleccionado = null;
   let recognitionInstance = null;
   let startTime = 0;
-  const TIEMPO_MINIMO_ESCUCHA = 5000; // 5 segundos mínimo antes de poder cortar
+  let textoAntesEdicion = '';
+  const TIEMPO_MINIMO_ESCUCHA = 5000; // 5 segundos mínimo
 
   function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
+
+  // ==========================================
+  // BOTÓN CANCELAR GRABACIÓN
+  // ==========================================
+  btnCancelarGrabacion.addEventListener('click', () => {
+    if (isRecording) {
+      detenerMicrofono(true); // true = cancelar sin guardar
+      showToast('❌ Grabación cancelada');
+      dialogText.textContent = 'Presioná el micrófono para empezar...';
+      dialogMeta.textContent = 'Listo para dictar';
+    }
+  });
+
+  // ==========================================
+  // BOTÓN LISTO EDICIÓN
+  // ==========================================
+  btnListoEdicion.addEventListener('click', () => {
+    if (isEditing) {
+      toggleEdit();
+      showToast('✅ Cambios guardados');
+    }
+  });
 
   // ==========================================
   // DICTADO CON TIEMPO MÍNIMO DE ESCUCHA
@@ -438,6 +503,7 @@
     isRecording = true;
     startTime = Date.now();
     btnMic.classList.add('recording');
+    btnCancelarGrabacion.classList.add('show');
     dialogMeta.textContent = '🎙️ Habla con calma, estoy escuchando...';
     
     if (dialogText.textContent === 'Presioná el micrófono para empezar...') {
@@ -467,8 +533,8 @@
         const textoFinal = textoActual ? textoActual + ' ' + textoNuevo : textoNuevo;
         
         dialogText.textContent = textoFinal;
-        dialogMeta.textContent = '✅ Guardado. Tocá el mic de nuevo para seguir.';
-        showToast('✅ Frase guardada');
+        dialogMeta.textContent = '✅ Guardado automáticamente. Tocá el mic de nuevo para seguir.';
+        showToast('✅ Guardado automáticamente');
         
         if (textoFinal.length > 3) {
            historial.unshift({
@@ -489,12 +555,10 @@
     };
 
     recognitionInstance.onend = () => {
-      // CLAVE: Si pasaron menos de 5 segundos, reiniciar automáticamente
       const tiempoTranscurrido = Date.now() - startTime;
       
       if (tiempoTranscurrido < TIEMPO_MINIMO_ESCUCHA && isRecording) {
-        // Aún no pasó el tiempo mínimo, reiniciar
-        dialogMeta.textContent = '⏳ Habla con calma, estoy escuchando...';
+        dialogMeta.textContent = ' Habla con calma, estoy escuchando...';
         setTimeout(() => {
           if (isRecording) {
             try {
@@ -505,7 +569,6 @@
           }
         }, 100);
       } else {
-        // Pasó el tiempo mínimo, cortar definitivamente
         detenerMicrofono();
       }
     };
@@ -518,14 +581,17 @@
     }
   }
 
-  function detenerMicrofono() {
+  function detenerMicrofono(cancelar = false) {
     isRecording = false;
     btnMic.classList.remove('recording');
+    btnCancelarGrabacion.classList.remove('show');
+    
     if (recognitionInstance) {
       try {
         recognitionInstance.stop();
       } catch(e) {}
     }
+    
     if (dialogText.textContent === '') {
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
@@ -548,7 +614,10 @@
     isEditing = !isEditing;
     dialogText.contentEditable = isEditing;
     editBadge.classList.toggle('show', isEditing);
+    btnListoEdicion.classList.toggle('show', isEditing);
+    
     if (isEditing) {
+      textoAntesEdicion = dialogText.textContent;
       dialogText.focus();
       showToast('✏️ Modo edición activado');
     } else {
@@ -613,7 +682,7 @@
     const email = contactEmail.value.trim();
     
     if (!name || (!phone && !email)) {
-      showToast('⚠️ Completá al menos nombre y teléfono o email');
+      showToast('️ Completá al menos nombre y teléfono o email');
       return;
     }
     
@@ -634,7 +703,7 @@
           <div class="contact-info">
             <div class="contact-name">${c.name}</div>
             <div class="contact-details">
-              ${c.phone ? ' ' + c.phone : ''}
+              ${c.phone ? '📱 ' + c.phone : ''}
               ${c.phone && c.email ? ' | ' : ''}
               ${c.email ? '✉️ ' + c.email : ''}
             </div>
@@ -649,7 +718,7 @@
           const contacto = contactos.find(c => c.id === parseInt(el.dataset.id));
           if (contacto) {
             contactoSeleccionado = contacto;
-            selectedContactDisplay.textContent = `👤 ${contacto.name}`;
+            selectedContactDisplay.textContent = ` ${contacto.name}`;
             selectedContactDisplay.classList.add('show');
             modalContactos.classList.remove('show');
             showToast(`📇 ${contacto.name} seleccionado`);
