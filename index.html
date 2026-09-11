@@ -22,7 +22,6 @@
     gap: 10px;
   }
 
-  /* 1. CUADRO DE DIÁLOGO */
   .dialog-box {
     flex: 1;
     background: #ffffff;
@@ -103,7 +102,6 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
-  /* 2. BOTONES - 2 FILAS */
   .controls {
     display: flex;
     flex-direction: column;
@@ -167,7 +165,6 @@
     50% { box-shadow: 0 4px 24px rgba(231,76,60,0.8); }
   }
 
-  /* 3. BARRA AGENDAR CONTACTOS */
   .contacts-bar {
     background: #ffffff;
     border-radius: 12px;
@@ -207,7 +204,6 @@
   }
   .selected-contact.show { display: block; }
 
-  /* 4. SLIDER DE PUBLICIDAD */
   .ad-slider {
     position: relative;
     height: 70px;
@@ -250,7 +246,6 @@
   }
   .ad-dot.active { background: #fff; width: 18px; border-radius: 3px; }
 
-  /* 5. FOOTER */
   .footer {
     height: 32px;
     background: #2c3e50;
@@ -263,7 +258,6 @@
     letter-spacing: 0.5px;
   }
 
-  /* MODALES */
   .modal-overlay {
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
@@ -302,7 +296,6 @@
     cursor: pointer;
   }
 
-  /* HISTORIAL */
   .historial-item {
     padding: 16px;
     background: #f8f9fa;
@@ -328,7 +321,6 @@
     line-height: 1.4;
   }
 
-  /* CONTACTOS */
   .contact-form {
     display: flex;
     flex-direction: column;
@@ -381,17 +373,9 @@
     align-items: center;
   }
   .contact-item:active { background: #e9ecef; }
-  .contact-info {
-    flex: 1;
-  }
-  .contact-name {
-    font-weight: 600;
-    color: #2c3e50;
-  }
-  .contact-details {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-  }
+  .contact-info { flex: 1; }
+  .contact-name { font-weight: 600; color: #2c3e50; }
+  .contact-details { font-size: 0.8rem; color: #7f8c8d; }
   .btn-delete {
     background: #e74c3c;
     color: white;
@@ -402,7 +386,6 @@
     cursor: pointer;
   }
 
-  /* ENVIAR OPCIONES */
   .send-options {
     display: flex;
     flex-direction: column;
@@ -426,7 +409,6 @@
   .send-option.email { background: #fce4ec; color: #c2185b; }
   .send-option.copy { background: #f5f5f5; color: #616161; }
 
-  /* TOAST */
   .toast {
     position: fixed;
     bottom: 80px;
@@ -449,7 +431,6 @@
 
 <div class="app-container">
 
-  <!-- 1. CUADRO DE DIÁLOGO -->
   <div class="dialog-box">
     <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
     <div class="edit-badge" id="editBadge">️ Editando</div>
@@ -458,7 +439,6 @@
     <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
   </div>
 
-  <!-- 2. BOTONES - 2 FILAS -->
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
@@ -468,7 +448,7 @@
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
       </div>
       <div class="btn-wrapper mic">
-        <button class="btn-mic" id="btnMic">🎤</button>
+        <button class="btn-mic" id="btnMic"></button>
       </div>
     </div>
     <div class="controls-row">
@@ -481,7 +461,6 @@
     </div>
   </div>
 
-  <!-- 3. AGENDAR CONTACTOS -->
   <div class="contacts-bar">
     <div class="contacts-left">
       <span>Agendar a:</span>
@@ -490,7 +469,6 @@
     <div class="selected-contact" id="selectedContactDisplay"></div>
   </div>
 
-  <!-- 4. SLIDER PUBLICIDAD -->
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
       <div class="ad-slide"> Espacio para Auto Publicidad 1</div>
@@ -504,12 +482,10 @@
     </div>
   </div>
 
-  <!-- 5. FOOTER -->
   <div class="footer">© 2026 Asistente de Voz — Todos los derechos reservados</div>
 
 </div>
 
-<!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
     <h3>📋 Historial de transcripciones</h3>
@@ -518,10 +494,9 @@
   </div>
 </div>
 
-<!-- MODAL CONTACTOS -->
 <div class="modal-overlay" id="modalContactos">
   <div class="modal">
-    <h3> Gestionar Contactos</h3>
+    <h3>👥 Gestionar Contactos</h3>
     
     <div class="contact-form">
       <div class="form-group">
@@ -539,14 +514,13 @@
       <button class="btn-save" id="btnGuardarContacto">💾 Guardar Contacto</button>
     </div>
 
-    <h4 style="margin: 16px 0 8px; color: #2c3e50;"> Contactos guardados:</h4>
+    <h4 style="margin: 16px 0 8px; color: #2c3e50;">📇 Contactos guardados:</h4>
     <div class="contact-list" id="contactList"></div>
     
     <button class="modal-close" id="contactosClose">Cerrar</button>
   </div>
 </div>
 
-<!-- MODAL ENVIAR -->
 <div class="modal-overlay" id="modalEnviar">
   <div class="modal">
     <h3>📤 Enviar mensaje</h3>
@@ -555,7 +529,7 @@
     </p>
     <div class="send-options">
       <div class="send-option whatsapp" id="sendWhatsApp">
-        <span></span>
+        <span>📱</span>
         <div>
           <div>WhatsApp</div>
           <small style="font-weight: normal; font-size: 0.8rem;">Abrir WhatsApp</small>
@@ -576,7 +550,7 @@
         </div>
       </div>
       <div class="send-option copy" id="sendCopy">
-        <span>📋</span>
+        <span></span>
         <div>
           <div>Copiar al portapapeles</div>
           <small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small>
@@ -587,11 +561,10 @@
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-  // ELEMENTOS
+  // ELEMENTOS DEL DOM
   const dialogText = document.getElementById('dialogText');
   const dialogMeta = document.getElementById('dialogMeta');
   const editBadge = document.getElementById('editBadge');
@@ -621,13 +594,120 @@
   let isEditing = false;
   let recognition = null;
   let finalTranscript = '';
+  let accumulatedWords = []; // Array de palabras únicas
+  let lastProcessedText = ''; // Último texto completo procesado
   let historial = [];
   let contactos = JSON.parse(localStorage.getItem('contactos') || '[]');
   let contactoSeleccionado = null;
   let silenceTimer = null;
   let lastSpeechTime = 0;
-  let lastFinalBlock = ''; // Solo el último bloque para comparar
   const SILENCE_DELAY = 3000;
+
+  // MULETILLAS Y PALABRAS DE RELLENO EN ESPAÑOL
+  const FILLER_WORDS = new Set([
+    'bueno', 'eh', 'este', 'em', 'o sea', 'digamos', 'como',
+    'entonces', 'así', 'asique', 'así que', 'entonce', 'pues',
+    'ah', 'um', 'mmm', 'eeee', 'che', 'viste', 'tipo'
+  ]);
+
+  // ==========================================
+  // 🎯 ALGORITMO INTELIGENTE - OPCIÓN 1 + 3
+  // ==========================================
+
+  /**
+   * Extrae solo las palabras NUEVAS comparando con el texto anterior
+   * Opción 1: Smart Diff
+   */
+  function extractNewWords(previousText, newText) {
+    const prevWords = previousText.trim().split(/\s+/).filter(w => w.length > 0);
+    const newWords = newText.trim().split(/\s+/).filter(w => w.length > 0);
+    
+    // Si no hay texto previo, devolver todo
+    if (prevWords.length === 0) return newWords;
+    
+    // Buscar dónde empieza la diferencia
+    let startIndex = 0;
+    for (let i = 0; i < newWords.length; i++) {
+      if (i >= prevWords.length || newWords[i] !== prevWords[i]) {
+        // Verificar si es una repetición parcial
+        const remainingPrev = prevWords.slice(i);
+        const matchIndex = newWords.findIndex((w, idx) => 
+          idx >= i && w === remainingPrev[0]
+        );
+        
+        if (matchIndex === -1 || matchIndex === i) {
+          startIndex = i;
+          break;
+        } else {
+          startIndex = matchIndex;
+          break;
+        }
+      }
+    }
+    
+    return newWords.slice(startIndex);
+  }
+
+  /**
+   * Limpia el texto: elimina duplicados consecutivos y muletillas
+   * Opción 3: Post-procesamiento
+   */
+  function cleanText(words) {
+    if (words.length === 0) return [];
+    
+    // 1. Eliminar duplicados consecutivos
+    const noDuplicates = [];
+    let lastWord = '';
+    
+    for (let word of words) {
+      const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+      if (cleanWord !== lastWord && cleanWord.length > 0) {
+        noDuplicates.push(word);
+        lastWord = cleanWord;
+      }
+    }
+    
+    // 2. Opcional: Eliminar muletillas (descomentar si se desea)
+    // const noFillers = noDuplicates.filter(word => {
+    //   const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
+    //   return !FILLER_WORDS.has(cleanWord);
+    // });
+    
+    return noDuplicates;
+  }
+
+  /**
+   * Procesa el texto de forma inteligente
+   */
+  function processTranscript(newText) {
+    // Paso 1: Extraer solo palabras nuevas
+    const newWords = extractNewWords(lastProcessedText, newText);
+    
+    // Paso 2: Acumular palabras
+    if (newWords.length > 0) {
+      accumulatedWords.push(...newWords);
+    }
+    
+    // Paso 3: Limpiar texto acumulado
+    const cleanedWords = cleanText(accumulatedWords);
+    
+    // Paso 4: Actualizar último texto procesado
+    lastProcessedText = cleanedWords.join(' ');
+    
+    return lastProcessedText;
+  }
+
+  /**
+   * Resetear el procesamiento
+   */
+  function resetProcessor() {
+    accumulatedWords = [];
+    lastProcessedText = '';
+  }
+
+  // ==========================================
+  // FUNCIONES AUXILIARES
+  // ==========================================
 
   function showToast(msg) {
     toast.textContent = msg;
@@ -635,7 +715,10 @@
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
 
-  // WEB SPEECH API - LÓGICA SIMPLIFICADA
+  // ==========================================
+  // WEB SPEECH API
+  // ==========================================
+
   if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognition = new SpeechRecognition();
@@ -646,24 +729,28 @@
     recognition.onresult = (event) => {
       lastSpeechTime = Date.now();
       let interimTranscript = '';
+      let finalWords = '';
       
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript.trim();
+        const transcript = event.results[i][0].transcript;
         
         if (event.results[i].isFinal) {
-          // Solo comparar con el último bloque final
-          if (transcript !== lastFinalBlock && transcript) {
-            lastFinalBlock = transcript;
-            finalTranscript = finalTranscript ? finalTranscript + ' ' + transcript : transcript;
-          }
+          finalWords += transcript + ' ';
         } else {
           interimTranscript += transcript;
         }
       }
       
-      dialogText.textContent = finalTranscript + (interimTranscript ? ' ' + interimTranscript : '');
-      dialogMeta.textContent = 'Escuchando...';
+      // Procesar solo si hay palabras finales nuevas
+      if (finalWords.trim()) {
+        const processedText = processTranscript(finalWords.trim());
+        dialogText.textContent = processedText + (interimTranscript ? ' ' + interimTranscript : '');
+      } else if (interimTranscript) {
+        // Mostrar interim sin procesar
+        dialogText.textContent = lastProcessedText + ' ' + interimTranscript;
+      }
       
+      dialogMeta.textContent = 'Escuchando...';
       resetSilenceTimer();
     };
 
@@ -701,7 +788,7 @@
           waitingIndicator.classList.add('show');
         }
         if (timeSinceLastSpeech >= SILENCE_DELAY) {
-          if (finalTranscript.trim()) {
+          if (lastProcessedText.trim()) {
             saveTranscription();
           }
         }
@@ -710,26 +797,24 @@
   }
 
   function saveTranscription() {
-    if (!finalTranscript.trim()) return;
+    if (!lastProcessedText.trim()) return;
     
     historial.unshift({
-      text: finalTranscript.trim(),
+      text: lastProcessedText.trim(),
       time: new Date().toLocaleTimeString()
     });
     
     dialogMeta.textContent = 'Guardado • ' + new Date().toLocaleTimeString();
     showToast('✅ Transcripción guardada');
     
-    finalTranscript = '';
-    lastFinalBlock = '';
+    resetProcessor();
     if (silenceTimer) clearTimeout(silenceTimer);
     waitingIndicator.classList.remove('show');
   }
 
   function startRecording() {
     isRecording = true;
-    finalTranscript = '';
-    lastFinalBlock = '';
+    resetProcessor();
     lastSpeechTime = Date.now();
     btnMic.classList.add('recording');
     dialogMeta.textContent = 'Escuchando...';
@@ -739,7 +824,7 @@
     if (recognition) {
       try {
         recognition.start();
-        showToast(' Grabando... hablá con calma');
+        showToast('🎤 Grabando... hablá con calma');
       } catch(e) {
         console.error(e);
       }
@@ -758,13 +843,17 @@
       } catch(e) {}
     }
     
-    if (finalTranscript.trim()) {
+    if (lastProcessedText.trim()) {
       saveTranscription();
     } else {
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
     }
   }
+
+  // ==========================================
+  // EVENT LISTENERS
+  // ==========================================
 
   btnMic.addEventListener('click', () => {
     if (isRecording) {
@@ -777,8 +866,7 @@
   btnBorrar.addEventListener('click', () => {
     dialogText.textContent = 'Presioná el micrófono para empezar...';
     dialogMeta.textContent = 'Listo para dictar';
-    finalTranscript = '';
-    lastFinalBlock = '';
+    resetProcessor();
     if (silenceTimer) clearTimeout(silenceTimer);
     waitingIndicator.classList.remove('show');
     if (isEditing) toggleEdit();
@@ -811,7 +899,6 @@
   btnSalir.addEventListener('click', () => {
     if (confirm('¿Querés salir del Asistente de Voz?')) {
       window.close();
-      // Si no cierra, redirigir
       setTimeout(() => {
         window.location.href = 'about:blank';
       }, 100);
@@ -888,7 +975,7 @@
           <div class="contact-info">
             <div class="contact-name">${c.name}</div>
             <div class="contact-details">
-              ${c.phone ? ' ' + c.phone : ''}
+              ${c.phone ? '📱 ' + c.phone : ''}
               ${c.phone && c.email ? ' | ' : ''}
               ${c.email ? '✉️ ' + c.email : ''}
             </div>
@@ -980,7 +1067,7 @@
   document.getElementById('sendCopy').addEventListener('click', () => {
     const text = dialogText.textContent.trim();
     navigator.clipboard.writeText(text).then(() => {
-      showToast(' Copiado al portapapeles');
+      showToast('📋 Copiado al portapapeles');
       modalEnviar.classList.remove('show');
     });
   });
@@ -990,6 +1077,7 @@
     if (e.target === modalEnviar) modalEnviar.classList.remove('show');
   });
 
+  // SLIDER PUBLICIDAD
   let currentSlide = 0;
   const slides = document.getElementById('adSlides');
   const dots = document.querySelectorAll('.ad-dot');
