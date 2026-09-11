@@ -22,6 +22,7 @@
     gap: 10px;
   }
 
+  /* 1. CUADRO DE DIÁLOGO */
   .dialog-box {
     flex: 1;
     background: #ffffff;
@@ -49,10 +50,11 @@
     background: #f8f9fa;
   }
   .dialog-meta {
-    font-size: 0.75rem;
-    color: #95a5a6;
+    font-size: 0.8rem;
+    color: #7f8c8d;
     margin-top: 12px;
     text-align: right;
+    font-weight: 500;
   }
   .edit-badge {
     position: absolute;
@@ -66,23 +68,7 @@
     display: none;
   }
   .edit-badge.show { display: block; }
-  .waiting-indicator {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: #f39c12;
-    color: white;
-    font-size: 0.7rem;
-    padding: 4px 10px;
-    border-radius: 12px;
-    display: none;
-    animation: blink 1s infinite;
-  }
-  .waiting-indicator.show { display: block; }
-  @keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-  }
+  
   .btn-salir {
     position: absolute;
     top: 12px;
@@ -91,8 +77,8 @@
     background: #e74c3c;
     color: white;
     border: none;
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     font-size: 1.2rem;
     cursor: pointer;
@@ -102,6 +88,7 @@
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
   }
 
+  /* 2. BOTONES - 2 FILAS */
   .controls {
     display: flex;
     flex-direction: column;
@@ -157,7 +144,7 @@
   }
   .btn-mic:active { transform: scale(0.92); }
   .btn-mic.recording {
-    animation: pulse 1s infinite;
+    animation: pulse 1.5s infinite; /* PULSO MÁS LENTO PARA TRANQUILIDAD */
     background: #c0392b;
   }
   @keyframes pulse {
@@ -165,6 +152,7 @@
     50% { box-shadow: 0 4px 24px rgba(231,76,60,0.8); }
   }
 
+  /* 3. BARRA AGENDAR CONTACTOS */
   .contacts-bar {
     background: #ffffff;
     border-radius: 12px;
@@ -175,233 +163,97 @@
     gap: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.06);
   }
-  .contacts-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .contacts-bar span {
-    font-size: 0.85rem;
-    color: #7f8c8d;
-    white-space: nowrap;
-  }
+  .contacts-left { display: flex; align-items: center; gap: 10px; }
+  .contacts-bar span { font-size: 0.85rem; color: #7f8c8d; white-space: nowrap; }
   .contact-chip {
-    background: #e8f4f8;
-    color: #2980b9;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s;
+    background: #e8f4f8; color: #2980b9; padding: 6px 14px;
+    border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
   }
   .contact-chip:active { background: #d0e8f0; }
-  .selected-contact {
-    font-size: 0.85rem;
-    color: #27ae60;
-    font-weight: 600;
-    display: none;
-  }
+  .selected-contact { font-size: 0.85rem; color: #27ae60; font-weight: 600; display: none; }
   .selected-contact.show { display: block; }
 
+  /* 4. SLIDER DE PUBLICIDAD */
   .ad-slider {
-    position: relative;
-    height: 70px;
-    border-radius: 12px;
-    overflow: hidden;
+    position: relative; height: 70px; border-radius: 12px; overflow: hidden;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
   }
-  .ad-slides {
-    display: flex;
-    height: 100%;
-    transition: transform 0.4s ease;
-  }
+  .ad-slides { display: flex; height: 100%; transition: transform 0.4s ease; }
   .ad-slide {
-    min-width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #fff;
+    min-width: 100%; height: 100%; display: flex; align-items: center;
+    justify-content: center; font-size: 0.9rem; font-weight: 600; color: #fff;
   }
   .ad-slide:nth-child(1) { background: linear-gradient(135deg, #fcb69f, #ffecd2); color: #d35400; }
   .ad-slide:nth-child(2) { background: linear-gradient(135deg, #a1c4fd, #c2e9fb); color: #2c3e50; }
   .ad-slide:nth-child(3) { background: linear-gradient(135deg, #d4fc79, #96e6a1); color: #27ae60; }
   .ad-dots {
-    position: absolute;
-    bottom: 8px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 6px;
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px;
   }
-  .ad-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.5);
-    transition: background 0.3s;
-  }
+  .ad-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: background 0.3s; }
   .ad-dot.active { background: #fff; width: 18px; border-radius: 3px; }
 
+  /* 5. FOOTER */
   .footer {
-    height: 32px;
-    background: #2c3e50;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.7rem;
-    color: #bdc3c7;
-    letter-spacing: 0.5px;
+    height: 32px; background: #2c3e50; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; color: #bdc3c7; letter-spacing: 0.5px;
   }
 
+  /* MODALES */
   .modal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 20px;
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.5); display: none; align-items: center;
+    justify-content: center; z-index: 100; padding: 20px;
   }
   .modal-overlay.show { display: flex; }
   .modal {
-    background: white;
-    border-radius: 16px;
-    padding: 24px;
-    width: 100%;
-    max-width: 500px;
-    max-height: 85vh;
-    overflow-y: auto;
+    background: white; border-radius: 16px; padding: 24px;
+    width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto;
   }
-  .modal h3 {
-    margin-bottom: 16px;
-    color: #2c3e50;
-    font-size: 1.2rem;
-  }
+  .modal h3 { margin-bottom: 16px; color: #2c3e50; font-size: 1.2rem; }
   .modal-close {
-    margin-top: 16px;
-    width: 100%;
-    padding: 14px;
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    font-size: 1rem;
-    cursor: pointer;
+    margin-top: 16px; width: 100%; padding: 14px; background: #e74c3c;
+    color: white; border: none; border-radius: 12px; font-weight: 600;
+    font-size: 1rem; cursor: pointer;
   }
 
   .historial-item {
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    cursor: pointer;
-    border-left: 4px solid #3498db;
-    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 16px; background: #f8f9fa; border-radius: 12px;
+    margin-bottom: 12px; cursor: pointer; border-left: 4px solid #3498db;
   }
-  .historial-item:active { 
-    transform: scale(0.98); 
-    background: #e9ecef;
-  }
-  .historial-time {
-    font-size: 0.8rem;
-    color: #7f8c8d;
-    margin-bottom: 6px;
-    font-weight: 600;
-  }
-  .historial-text {
-    font-size: 0.95rem;
-    color: #2c3e50;
-    line-height: 1.4;
-  }
+  .historial-item:active { transform: scale(0.98); background: #e9ecef; }
+  .historial-time { font-size: 0.8rem; color: #7f8c8d; margin-bottom: 6px; font-weight: 600; }
+  .historial-text { font-size: 0.95rem; color: #2c3e50; line-height: 1.4; }
 
-  .contact-form {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .form-group label {
-    font-size: 0.85rem;
-    color: #7f8c8d;
-    font-weight: 600;
-  }
+  .contact-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label { font-size: 0.85rem; color: #7f8c8d; font-weight: 600; }
   .form-group input {
-    padding: 12px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.2s;
+    padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;
   }
-  .form-group input:focus {
-    outline: none;
-    border-color: #3498db;
-  }
+  .form-group input:focus { outline: none; border-color: #3498db; }
   .btn-save {
-    padding: 12px;
-    background: #27ae60;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    font-size: 0.95rem;
+    padding: 12px; background: #27ae60; color: white; border: none;
+    border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem;
   }
-  .contact-list {
-    max-height: 300px;
-    overflow-y: auto;
-  }
+  .contact-list { max-height: 300px; overflow-y: auto; }
   .contact-item {
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 8px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
+    cursor: pointer; display: flex; justify-content: space-between; align-items: center;
   }
-  .contact-item:active { background: #e9ecef; }
   .contact-info { flex: 1; }
   .contact-name { font-weight: 600; color: #2c3e50; }
   .contact-details { font-size: 0.8rem; color: #7f8c8d; }
   .btn-delete {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 6px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    cursor: pointer;
+    background: #e74c3c; color: white; border: none; padding: 6px 10px;
+    border-radius: 6px; font-size: 0.75rem; cursor: pointer;
   }
 
-  .send-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+  .send-options { display: flex; flex-direction: column; gap: 10px; }
   .send-option {
-    padding: 16px;
-    background: #f8f9fa;
-    border-radius: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    transition: transform 0.2s;
+    padding: 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer;
+    display: flex; align-items: center; gap: 12px; font-size: 1rem; font-weight: 600;
   }
   .send-option:active { transform: scale(0.98); }
   .send-option.whatsapp { background: #dcf8c6; color: #25d366; }
@@ -410,19 +262,10 @@
   .send-option.copy { background: #f5f5f5; color: #616161; }
 
   .toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #2c3e50;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 24px;
-    font-size: 0.85rem;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 200;
-    pointer-events: none;
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: #2c3e50; color: white; padding: 12px 24px; border-radius: 24px;
+    font-size: 0.85rem; opacity: 0; transition: opacity 0.3s; z-index: 200;
+    pointer-events: none; text-align: center; width: 90%;
   }
   .toast.show { opacity: 1; }
 </style>
@@ -430,11 +273,9 @@
 <body>
 
 <div class="app-container">
-
   <div class="dialog-box">
     <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
-    <div class="edit-badge" id="editBadge">️ Editando</div>
-    <div class="waiting-indicator" id="waitingIndicator">️ Esperando...</div>
+    <div class="edit-badge" id="editBadge">✏️ Editando</div>
     <p class="dialog-text" id="dialogText">Presioná el micrófono para empezar...</p>
     <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
   </div>
@@ -448,7 +289,7 @@
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
       </div>
       <div class="btn-wrapper mic">
-        <button class="btn-mic" id="btnMic"></button>
+        <button class="btn-mic" id="btnMic">🎤</button>
       </div>
     </div>
     <div class="controls-row">
@@ -471,7 +312,7 @@
 
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
-      <div class="ad-slide"> Espacio para Auto Publicidad 1</div>
+      <div class="ad-slide">📢 Espacio para Auto Publicidad 1</div>
       <div class="ad-slide">🎉 Promoción especial 2</div>
       <div class="ad-slide">⭐ Nuevo servicio disponible 3</div>
     </div>
@@ -483,9 +324,9 @@
   </div>
 
   <div class="footer">© 2026 Asistente de Voz — Todos los derechos reservados</div>
-
 </div>
 
+<!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
     <h3>📋 Historial de transcripciones</h3>
@@ -494,10 +335,10 @@
   </div>
 </div>
 
+<!-- MODAL CONTACTOS -->
 <div class="modal-overlay" id="modalContactos">
   <div class="modal">
     <h3>👥 Gestionar Contactos</h3>
-    
     <div class="contact-form">
       <div class="form-group">
         <label>Nombre:</label>
@@ -513,48 +354,29 @@
       </div>
       <button class="btn-save" id="btnGuardarContacto">💾 Guardar Contacto</button>
     </div>
-
     <h4 style="margin: 16px 0 8px; color: #2c3e50;">📇 Contactos guardados:</h4>
     <div class="contact-list" id="contactList"></div>
-    
     <button class="modal-close" id="contactosClose">Cerrar</button>
   </div>
 </div>
 
+<!-- MODAL ENVIAR -->
 <div class="modal-overlay" id="modalEnviar">
   <div class="modal">
     <h3>📤 Enviar mensaje</h3>
-    <p style="margin-bottom: 16px; color: #7f8c8d; font-size: 0.9rem;">
-      Elegí cómo querés enviar el mensaje:
-    </p>
+    <p style="margin-bottom: 16px; color: #7f8c8d; font-size: 0.9rem;">Elegí cómo querés enviar el mensaje:</p>
     <div class="send-options">
       <div class="send-option whatsapp" id="sendWhatsApp">
-        <span>📱</span>
-        <div>
-          <div>WhatsApp</div>
-          <small style="font-weight: normal; font-size: 0.8rem;">Abrir WhatsApp</small>
-        </div>
+        <span>📱</span><div><div>WhatsApp</div><small style="font-weight: normal; font-size: 0.8rem;">Abrir WhatsApp</small></div>
       </div>
       <div class="send-option sms" id="sendSMS">
-        <span>💬</span>
-        <div>
-          <div>SMS / Mensaje</div>
-          <small style="font-weight: normal; font-size: 0.8rem;">Abrir app de mensajes</small>
-        </div>
+        <span>💬</span><div><div>SMS / Mensaje</div><small style="font-weight: normal; font-size: 0.8rem;">Abrir app de mensajes</small></div>
       </div>
       <div class="send-option email" id="sendEmail">
-        <span>✉️</span>
-        <div>
-          <div>Email</div>
-          <small style="font-weight: normal; font-size: 0.8rem;">Abrir cliente de correo</small>
-        </div>
+        <span>✉️</span><div><div>Email</div><small style="font-weight: normal; font-size: 0.8rem;">Abrir cliente de correo</small></div>
       </div>
       <div class="send-option copy" id="sendCopy">
-        <span></span>
-        <div>
-          <div>Copiar al portapapeles</div>
-          <small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small>
-        </div>
+        <span>📋</span><div><div>Copiar al portapapeles</div><small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small></div>
       </div>
     </div>
     <button class="modal-close" id="enviarClose">Cancelar</button>
@@ -568,7 +390,6 @@
   const dialogText = document.getElementById('dialogText');
   const dialogMeta = document.getElementById('dialogMeta');
   const editBadge = document.getElementById('editBadge');
-  const waitingIndicator = document.getElementById('waitingIndicator');
   const btnMic = document.getElementById('btnMic');
   const btnBorrar = document.getElementById('btnBorrar');
   const btnCorregir = document.getElementById('btnCorregir');
@@ -592,122 +413,9 @@
   // ESTADO
   let isRecording = false;
   let isEditing = false;
-  let recognition = null;
-  let finalTranscript = '';
-  let accumulatedWords = []; // Array de palabras únicas
-  let lastProcessedText = ''; // Último texto completo procesado
   let historial = [];
   let contactos = JSON.parse(localStorage.getItem('contactos') || '[]');
   let contactoSeleccionado = null;
-  let silenceTimer = null;
-  let lastSpeechTime = 0;
-  const SILENCE_DELAY = 3000;
-
-  // MULETILLAS Y PALABRAS DE RELLENO EN ESPAÑOL
-  const FILLER_WORDS = new Set([
-    'bueno', 'eh', 'este', 'em', 'o sea', 'digamos', 'como',
-    'entonces', 'así', 'asique', 'así que', 'entonce', 'pues',
-    'ah', 'um', 'mmm', 'eeee', 'che', 'viste', 'tipo'
-  ]);
-
-  // ==========================================
-  // 🎯 ALGORITMO INTELIGENTE - OPCIÓN 1 + 3
-  // ==========================================
-
-  /**
-   * Extrae solo las palabras NUEVAS comparando con el texto anterior
-   * Opción 1: Smart Diff
-   */
-  function extractNewWords(previousText, newText) {
-    const prevWords = previousText.trim().split(/\s+/).filter(w => w.length > 0);
-    const newWords = newText.trim().split(/\s+/).filter(w => w.length > 0);
-    
-    // Si no hay texto previo, devolver todo
-    if (prevWords.length === 0) return newWords;
-    
-    // Buscar dónde empieza la diferencia
-    let startIndex = 0;
-    for (let i = 0; i < newWords.length; i++) {
-      if (i >= prevWords.length || newWords[i] !== prevWords[i]) {
-        // Verificar si es una repetición parcial
-        const remainingPrev = prevWords.slice(i);
-        const matchIndex = newWords.findIndex((w, idx) => 
-          idx >= i && w === remainingPrev[0]
-        );
-        
-        if (matchIndex === -1 || matchIndex === i) {
-          startIndex = i;
-          break;
-        } else {
-          startIndex = matchIndex;
-          break;
-        }
-      }
-    }
-    
-    return newWords.slice(startIndex);
-  }
-
-  /**
-   * Limpia el texto: elimina duplicados consecutivos y muletillas
-   * Opción 3: Post-procesamiento
-   */
-  function cleanText(words) {
-    if (words.length === 0) return [];
-    
-    // 1. Eliminar duplicados consecutivos
-    const noDuplicates = [];
-    let lastWord = '';
-    
-    for (let word of words) {
-      const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
-      if (cleanWord !== lastWord && cleanWord.length > 0) {
-        noDuplicates.push(word);
-        lastWord = cleanWord;
-      }
-    }
-    
-    // 2. Opcional: Eliminar muletillas (descomentar si se desea)
-    // const noFillers = noDuplicates.filter(word => {
-    //   const cleanWord = word.toLowerCase().replace(/[.,!?;:]/g, '');
-    //   return !FILLER_WORDS.has(cleanWord);
-    // });
-    
-    return noDuplicates;
-  }
-
-  /**
-   * Procesa el texto de forma inteligente
-   */
-  function processTranscript(newText) {
-    // Paso 1: Extraer solo palabras nuevas
-    const newWords = extractNewWords(lastProcessedText, newText);
-    
-    // Paso 2: Acumular palabras
-    if (newWords.length > 0) {
-      accumulatedWords.push(...newWords);
-    }
-    
-    // Paso 3: Limpiar texto acumulado
-    const cleanedWords = cleanText(accumulatedWords);
-    
-    // Paso 4: Actualizar último texto procesado
-    lastProcessedText = cleanedWords.join(' ');
-    
-    return lastProcessedText;
-  }
-
-  /**
-   * Resetear el procesamiento
-   */
-  function resetProcessor() {
-    accumulatedWords = [];
-    lastProcessedText = '';
-  }
-
-  // ==========================================
-  // FUNCIONES AUXILIARES
-  // ==========================================
 
   function showToast(msg) {
     toast.textContent = msg;
@@ -716,159 +424,101 @@
   }
 
   // ==========================================
-  // WEB SPEECH API
+  // DICTADO (Lógica probada de Círculo Vital)
   // ==========================================
+  function activarMicrofono() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showToast("Dictado no disponible en este navegador");
+      return;
+    }
 
-  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new SpeechRecognition();
-    recognition.lang = 'es-ES';
-    recognition.continuous = true;
-    recognition.interimResults = true;
+    if (isRecording) {
+      // Si ya está grabando, paramos manualmente
+      detenerMicrofono();
+      return;
+    }
 
-    recognition.onresult = (event) => {
-      lastSpeechTime = Date.now();
-      let interimTranscript = '';
-      let finalWords = '';
-      
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        const transcript = event.results[i][0].transcript;
-        
-        if (event.results[i].isFinal) {
-          finalWords += transcript + ' ';
-        } else {
-          interimTranscript += transcript;
-        }
-      }
-      
-      // Procesar solo si hay palabras finales nuevas
-      if (finalWords.trim()) {
-        const processedText = processTranscript(finalWords.trim());
-        dialogText.textContent = processedText + (interimTranscript ? ' ' + interimTranscript : '');
-      } else if (interimTranscript) {
-        // Mostrar interim sin procesar
-        dialogText.textContent = lastProcessedText + ' ' + interimTranscript;
-      }
-      
-      dialogMeta.textContent = 'Escuchando...';
-      resetSilenceTimer();
+    isRecording = true;
+    btnMic.classList.add('recording');
+    // Mensaje que invita a la pausa natural de 1.5 a 2 segundos
+    dialogMeta.textContent = 'Escuchando... (Hacé una pausa de 2 seg. para guardar)';
+    
+    // Limpiamos el texto solo si era el mensaje por defecto
+    if (dialogText.textContent === 'Presioná el micrófono para empezar...') {
+      dialogText.textContent = '';
+    }
+    
+    showToast('🎤 Escuchando...');
+
+    const r = new SR();
+    r.lang = 'es-ES';
+    r.interimResults = false; // LA CLAVE: Espera al resultado final, evita la ametralladora
+    
+    r.onstart = () => {
+      btnMic.classList.add('recording');
     };
 
-    recognition.onerror = (event) => {
+    r.onresult = (event) => {
+      const textoNuevo = event.results[0][0].transcript.trim();
+      
+      if (textoNuevo) {
+        const textoActual = dialogText.textContent === 'Presioná el micrófono para empezar...' ? '' : dialogText.textContent;
+        // Agregamos un espacio si ya hay texto
+        const textoFinal = textoActual ? textoActual + ' ' + textoNuevo : textoNuevo;
+        
+        dialogText.textContent = textoFinal;
+        dialogMeta.textContent = '✅ Guardado. Tocá el mic de nuevo para seguir.';
+        showToast('✅ Frase guardada');
+        
+        // Guardamos en el historial
+        if (textoFinal.length > 3) {
+           historial.unshift({
+             text: textoFinal,
+             time: new Date().toLocaleTimeString()
+           });
+        }
+      }
+    };
+
+    r.onerror = (event) => {
       console.error('Error:', event.error);
       if (event.error !== 'no-speech') {
-        showToast('Error: ' + event.error);
+        showToast('No escuché nada, intentá de nuevo');
       }
+      detenerMicrofono();
     };
 
-    recognition.onend = () => {
-      if (isRecording) {
-        setTimeout(() => {
-          if (isRecording) {
-            try {
-              recognition.start();
-            } catch(e) {}
-          }
-        }, 100);
-      }
+    r.onend = () => {
+      // El navegador corta automáticamente cuando detecta ~1.5 a 2 segundos de silencio.
+      detenerMicrofono();
     };
-  } else {
-    dialogText.textContent = 'Tu navegador no soporta reconocimiento de voz.';
-    btnMic.disabled = true;
-  }
 
-  function resetSilenceTimer() {
-    if (silenceTimer) clearTimeout(silenceTimer);
-    waitingIndicator.classList.remove('show');
-    
-    if (isRecording) {
-      silenceTimer = setTimeout(() => {
-        const timeSinceLastSpeech = Date.now() - lastSpeechTime;
-        if (timeSinceLastSpeech >= SILENCE_DELAY - 100) {
-          waitingIndicator.classList.add('show');
-        }
-        if (timeSinceLastSpeech >= SILENCE_DELAY) {
-          if (lastProcessedText.trim()) {
-            saveTranscription();
-          }
-        }
-      }, 100);
+    try {
+      r.start();
+    } catch(e) {
+      console.error(e);
+      detenerMicrofono();
     }
   }
 
-  function saveTranscription() {
-    if (!lastProcessedText.trim()) return;
-    
-    historial.unshift({
-      text: lastProcessedText.trim(),
-      time: new Date().toLocaleTimeString()
-    });
-    
-    dialogMeta.textContent = 'Guardado • ' + new Date().toLocaleTimeString();
-    showToast('✅ Transcripción guardada');
-    
-    resetProcessor();
-    if (silenceTimer) clearTimeout(silenceTimer);
-    waitingIndicator.classList.remove('show');
-  }
-
-  function startRecording() {
-    isRecording = true;
-    resetProcessor();
-    lastSpeechTime = Date.now();
-    btnMic.classList.add('recording');
-    dialogMeta.textContent = 'Escuchando...';
-    dialogText.textContent = '';
-    waitingIndicator.classList.remove('show');
-    
-    if (recognition) {
-      try {
-        recognition.start();
-        showToast('🎤 Grabando... hablá con calma');
-      } catch(e) {
-        console.error(e);
-      }
-    }
-  }
-
-  function stopRecording() {
+  function detenerMicrofono() {
     isRecording = false;
     btnMic.classList.remove('recording');
-    if (silenceTimer) clearTimeout(silenceTimer);
-    waitingIndicator.classList.remove('show');
-    
-    if (recognition) {
-      try {
-        recognition.stop();
-      } catch(e) {}
-    }
-    
-    if (lastProcessedText.trim()) {
-      saveTranscription();
-    } else {
+    if (dialogText.textContent === '') {
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
     }
   }
 
-  // ==========================================
-  // EVENT LISTENERS
-  // ==========================================
-
+  // Event Listeners
   btnMic.addEventListener('click', () => {
-    if (isRecording) {
-      stopRecording();
-    } else {
-      startRecording();
-    }
+    activarMicrofono();
   });
 
   btnBorrar.addEventListener('click', () => {
     dialogText.textContent = 'Presioná el micrófono para empezar...';
     dialogMeta.textContent = 'Listo para dictar';
-    resetProcessor();
-    if (silenceTimer) clearTimeout(silenceTimer);
-    waitingIndicator.classList.remove('show');
     if (isEditing) toggleEdit();
     showToast('🗑️ Texto borrado');
   });
@@ -881,7 +531,6 @@
       dialogText.focus();
       showToast('✏️ Modo edición activado');
     } else {
-      finalTranscript = dialogText.textContent;
       showToast('✅ Cambios guardados');
     }
   }
@@ -899,12 +548,11 @@
   btnSalir.addEventListener('click', () => {
     if (confirm('¿Querés salir del Asistente de Voz?')) {
       window.close();
-      setTimeout(() => {
-        window.location.href = 'about:blank';
-      }, 100);
+      setTimeout(() => { window.location.href = 'about:blank'; }, 100);
     }
   });
 
+  // --- FUNCIONES DE HISTORIAL ---
   function renderHistorial() {
     if (historial.length === 0) {
       historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">Aún no hay transcripciones</p>';
@@ -920,7 +568,6 @@
         el.addEventListener('click', () => {
           const idx = el.dataset.index;
           dialogText.textContent = historial[idx].text;
-          finalTranscript = historial[idx].text;
           dialogMeta.textContent = 'Cargado • ' + historial[idx].time;
           modalHistorial.classList.remove('show');
           showToast('📋 Texto cargado');
@@ -938,6 +585,7 @@
     if (e.target === modalHistorial) modalHistorial.classList.remove('show');
   });
 
+  // --- FUNCIONES DE CONTACTOS ---
   btnGuardarContacto.addEventListener('click', () => {
     const name = contactName.value.trim();
     const phone = contactPhone.value.trim();
@@ -948,20 +596,10 @@
       return;
     }
     
-    const nuevoContacto = {
-      id: Date.now(),
-      name,
-      phone,
-      email
-    };
-    
-    contactos.push(nuevoContacto);
+    contactos.push({ id: Date.now(), name, phone, email });
     localStorage.setItem('contactos', JSON.stringify(contactos));
     
-    contactName.value = '';
-    contactPhone.value = '';
-    contactEmail.value = '';
-    
+    contactName.value = ''; contactPhone.value = ''; contactEmail.value = '';
     renderContactos();
     showToast('✅ Contacto guardado');
   });
@@ -980,17 +618,14 @@
               ${c.email ? '✉️ ' + c.email : ''}
             </div>
           </div>
-          <div style="display: flex; gap: 8px;">
-            <button class="btn-delete" data-delete="${c.id}">Eliminar</button>
-          </div>
+          <button class="btn-delete" data-delete="${c.id}">Eliminar</button>
         </div>
       `).join('');
       
       document.querySelectorAll('.contact-item').forEach(el => {
         el.addEventListener('click', (e) => {
           if (e.target.dataset.delete) return;
-          const id = parseInt(el.dataset.id);
-          const contacto = contactos.find(c => c.id === id);
+          const contacto = contactos.find(c => c.id === parseInt(el.dataset.id));
           if (contacto) {
             contactoSeleccionado = contacto;
             selectedContactDisplay.textContent = `👤 ${contacto.name}`;
@@ -1004,10 +639,9 @@
       document.querySelectorAll('[data-delete]').forEach(btn => {
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
-          const id = parseInt(btn.dataset.delete);
-          contactos = contactos.filter(c => c.id !== id);
+          contactos = contactos.filter(c => c.id !== parseInt(btn.dataset.delete));
           localStorage.setItem('contactos', JSON.stringify(contactos));
-          if (contactoSeleccionado && contactoSeleccionado.id === id) {
+          if (contactoSeleccionado && contactoSeleccionado.id === parseInt(btn.dataset.delete)) {
             contactoSeleccionado = null;
             selectedContactDisplay.classList.remove('show');
           }
@@ -1027,18 +661,17 @@
     if (e.target === modalContactos) modalContactos.classList.remove('show');
   });
 
+  // --- FUNCIONES DE ENVÍO ---
   document.getElementById('sendWhatsApp').addEventListener('click', () => {
     const text = encodeURIComponent(dialogText.textContent.trim());
     let url = 'https://wa.me/';
     if (contactoSeleccionado && contactoSeleccionado.phone) {
-      const phone = contactoSeleccionado.phone.replace(/\D/g, '');
-      url += phone + '?text=' + text;
+      url += contactoSeleccionado.phone.replace(/\D/g, '') + '?text=' + text;
     } else {
       url += '?text=' + text;
     }
     window.open(url, '_blank');
     modalEnviar.classList.remove('show');
-    showToast('📱 Abriendo WhatsApp...');
   });
 
   document.getElementById('sendSMS').addEventListener('click', () => {
@@ -1049,7 +682,6 @@
     }
     window.location.href = url;
     modalEnviar.classList.remove('show');
-    showToast('💬 Abriendo mensajes...');
   });
 
   document.getElementById('sendEmail').addEventListener('click', () => {
@@ -1061,12 +693,10 @@
     url += '?subject=Mensaje&body=' + text;
     window.location.href = url;
     modalEnviar.classList.remove('show');
-    showToast('✉️ Abriendo email...');
   });
 
   document.getElementById('sendCopy').addEventListener('click', () => {
-    const text = dialogText.textContent.trim();
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(dialogText.textContent.trim()).then(() => {
       showToast('📋 Copiado al portapapeles');
       modalEnviar.classList.remove('show');
     });
@@ -1077,7 +707,7 @@
     if (e.target === modalEnviar) modalEnviar.classList.remove('show');
   });
 
-  // SLIDER PUBLICIDAD
+  // --- SLIDER PUBLICIDAD ---
   let currentSlide = 0;
   const slides = document.getElementById('adSlides');
   const dots = document.querySelectorAll('.ad-dot');
