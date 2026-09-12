@@ -4,6 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Asistente de Voz</title>
+<meta name="theme-color" content="#f0f2f5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Asistente de Voz">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-512.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body, html {
@@ -12,6 +18,11 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background-color: #f0f2f5;
     color: #333;
+    transition: background-color 0.3s, color 0.3s;
+  }
+  body.modo-oscuro {
+    background-color: #1a1a1a;
+    color: #e5e5e5;
   }
 
   .app-container {
@@ -30,31 +41,68 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
     flex-direction: column;
-    justify-content: center;
     overflow: hidden;
     position: relative;
+    transition: background-color 0.3s;
   }
+  body.modo-oscuro .dialog-box {
+    background: #2d2d2d;
+  }
+
+  .dialog-text-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding-right: 4px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .dialog-text-container::-webkit-scrollbar { width: 6px; }
+  .dialog-text-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+  
   .dialog-text {
     font-size: 1.3rem;
-    line-height: 1.5;
+    line-height: 1.6;
     color: #2c3e50;
     text-align: center;
     outline: none;
     min-height: 60px;
+    margin-top: auto;
+    transition: font-size 0.3s;
   }
+  body.modo-oscuro .dialog-text {
+    color: #e5e5e5;
+  }
+  .dialog-text.texto-chico { font-size: 1rem; }
+  .dialog-text.texto-normal { font-size: 1.3rem; }
+  .dialog-text.texto-grande { font-size: 1.7rem; }
+  
   .dialog-text[contenteditable="true"] {
     border: 2px dashed #3498db;
     padding: 12px;
     border-radius: 8px;
     background: #f8f9fa;
+    text-align: left;
   }
+  body.modo-oscuro .dialog-text[contenteditable="true"] {
+    background: #1a1a1a;
+    color: #e5e5e5;
+  }
+  
   .dialog-meta {
     font-size: 0.8rem;
     color: #7f8c8d;
     margin-top: 12px;
     text-align: right;
     font-weight: 500;
+    flex-shrink: 0;
   }
+  body.modo-oscuro .dialog-meta {
+    color: #a0a0a0;
+  }
+  
   .edit-badge {
     position: absolute;
     top: 12px;
@@ -85,6 +133,7 @@
     align-items: center;
     justify-content: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 5;
   }
 
   .controls {
@@ -124,6 +173,10 @@
     white-space: nowrap;
     min-height: 50px;
   }
+  body.modo-oscuro .btn-side {
+    background: #2d2d2d;
+    color: #e5e5e5;
+  }
   .btn-side:active { transform: scale(0.95); }
   .btn-mic {
     width: 64px;
@@ -159,9 +212,14 @@
     justify-content: space-between;
     gap: 10px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+    transition: background-color 0.3s;
+  }
+  body.modo-oscuro .contacts-bar {
+    background: #2d2d2d;
   }
   .contacts-left { display: flex; align-items: center; gap: 10px; }
   .contacts-bar span { font-size: 0.85rem; color: #7f8c8d; white-space: nowrap; }
+  body.modo-oscuro .contacts-bar span { color: #a0a0a0; }
   .contact-chip {
     background: #e8f4f8; color: #2980b9; padding: 6px 14px;
     border-radius: 20px; font-size: 0.85rem; font-weight: 600; cursor: pointer;
@@ -205,7 +263,12 @@
     background: white; border-radius: 16px; padding: 24px;
     width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto;
   }
+  body.modo-oscuro .modal {
+    background: #2d2d2d;
+    color: #e5e5e5;
+  }
   .modal h3 { margin-bottom: 16px; color: #2c3e50; font-size: 1.2rem; }
+  body.modo-oscuro .modal h3 { color: #e5e5e5; }
   .modal-close {
     margin-top: 16px; width: 100%; padding: 14px; background: #e74c3c;
     color: white; border: none; border-radius: 12px; font-weight: 600;
@@ -216,15 +279,26 @@
     padding: 16px; background: #f8f9fa; border-radius: 12px;
     margin-bottom: 12px; cursor: pointer; border-left: 4px solid #3498db;
   }
+  body.modo-oscuro .historial-item {
+    background: #1a1a1a;
+    color: #e5e5e5;
+  }
   .historial-item:active { transform: scale(0.98); background: #e9ecef; }
   .historial-time { font-size: 0.8rem; color: #7f8c8d; margin-bottom: 6px; font-weight: 600; }
   .historial-text { font-size: 0.95rem; color: #2c3e50; line-height: 1.4; }
+  body.modo-oscuro .historial-text { color: #e5e5e5; }
 
   .contact-form { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
   .form-group { display: flex; flex-direction: column; gap: 4px; }
   .form-group label { font-size: 0.85rem; color: #7f8c8d; font-weight: 600; }
+  body.modo-oscuro .form-group label { color: #a0a0a0; }
   .form-group input {
     padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 1rem;
+  }
+  body.modo-oscuro .form-group input {
+    background: #1a1a1a;
+    color: #e5e5e5;
+    border-color: #444;
   }
   .form-group input:focus { outline: none; border-color: #3498db; }
   .btn-save {
@@ -236,9 +310,15 @@
     padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
     cursor: pointer; display: flex; justify-content: space-between; align-items: center;
   }
+  body.modo-oscuro .contact-item {
+    background: #1a1a1a;
+    color: #e5e5e5;
+  }
   .contact-info { flex: 1; }
   .contact-name { font-weight: 600; color: #2c3e50; }
+  body.modo-oscuro .contact-name { color: #e5e5e5; }
   .contact-details { font-size: 0.8rem; color: #7f8c8d; }
+  body.modo-oscuro .contact-details { color: #a0a0a0; }
   .btn-delete {
     background: #e74c3c; color: white; border: none; padding: 6px 10px;
     border-radius: 6px; font-size: 0.75rem; cursor: pointer;
@@ -248,6 +328,10 @@
   .send-option {
     padding: 16px; background: #f8f9fa; border-radius: 12px; cursor: pointer;
     display: flex; align-items: center; gap: 12px; font-size: 1rem; font-weight: 600;
+  }
+  body.modo-oscuro .send-option {
+    background: #1a1a1a;
+    color: #e5e5e5;
   }
   .send-option:active { transform: scale(0.98); }
   .send-option.whatsapp { background: #dcf8c6; color: #25d366; }
@@ -263,7 +347,6 @@
   }
   .toast.show { opacity: 1; }
   
-  /* BOTÓN DE CANCELAR GRABACIÓN */
   .btn-cancelar-grabacion {
     position: absolute;
     top: 12px;
@@ -279,10 +362,10 @@
     align-items: center;
     gap: 4px;
     font-weight: 600;
+    z-index: 5;
   }
   .btn-cancelar-grabacion.show { display: flex; }
   
-  /* BOTÓN LISTO EDICIÓN */
   .btn-listo-edicion {
     position: absolute;
     top: 12px;
@@ -298,8 +381,80 @@
     align-items: center;
     gap: 4px;
     font-weight: 600;
+    z-index: 5;
   }
   .btn-listo-edicion.show { display: flex; }
+  
+  .btn-instalar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    z-index: 5;
+  }
+  .btn-instalar.show { display: flex; }
+  
+  /* Botón de leer en voz alta */
+  .btn-leer {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: #9b59b6;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    z-index: 5;
+  }
+  
+  /* Ajustes */
+  .ajuste-opcion {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+  body.modo-oscuro .ajuste-opcion {
+    background: #1a1a1a;
+  }
+  .ajuste-opcion label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #2c3e50;
+  }
+  body.modo-oscuro .ajuste-opcion label {
+    color: #e5e5e5;
+  }
+  .ajuste-opcion select {
+    padding: 6px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+  }
+  body.modo-oscuro .ajuste-opcion select {
+    background: #2d2d2d;
+    color: #e5e5e5;
+    border-color: #444;
+  }
 </style>
 </head>
 <body>
@@ -309,21 +464,31 @@
     <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
     <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion">✖ Cancelar</button>
     <button class="btn-listo-edicion" id="btnListoEdicion">✓ Listo</button>
+    <button class="btn-instalar" id="btnInstalar">📲 Instalar</button>
     <div class="edit-badge" id="editBadge">✏️ Editando</div>
-    <p class="dialog-text" id="dialogText">Presioná el micrófono para empezar...</p>
+    
+    <div class="dialog-text-container" id="dialogTextContainer">
+      <p class="dialog-text texto-normal" id="dialogText">Presioná el micrófono para empezar...</p>
+    </div>
     <p class="dialog-meta" id="dialogMeta">Listo para dictar</p>
+    
+    <!-- Botón para leer en voz alta -->
+    <button class="btn-leer" id="btnLeer">🔊 Leer</button>
   </div>
 
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHistorial"> Historial</button>
+        <button class="btn-side" id="btnHistorial">📋 Historial</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
       </div>
       <div class="btn-wrapper mic">
-        <button class="btn-mic" id="btnMic"></button>
+        <button class="btn-mic" id="btnMic">🎤</button>
+      </div>
+      <div class="btn-wrapper">
+        <button class="btn-side" id="btnAjustes">⚙️ Ajustes</button>
       </div>
     </div>
     <div class="controls-row">
@@ -339,7 +504,7 @@
   <div class="contacts-bar">
     <div class="contacts-left">
       <span>Agendar a:</span>
-      <div class="contact-chip" id="btnGestionarContactos">👥 Contactos</div>
+      <div class="contact-chip" id="btnGestionarContactos"> Contactos</div>
     </div>
     <div class="selected-contact" id="selectedContactDisplay"></div>
   </div>
@@ -363,7 +528,7 @@
 <!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
-    <h3> Historial de transcripciones</h3>
+    <h3>📋 Historial de transcripciones</h3>
     <div id="historialList"></div>
     <button class="modal-close" id="historialClose">Cerrar</button>
   </div>
@@ -372,7 +537,7 @@
 <!-- MODAL CONTACTOS -->
 <div class="modal-overlay" id="modalContactos">
   <div class="modal">
-    <h3>👥 Gestionar Contactos</h3>
+    <h3> Gestionar Contactos</h3>
     <div class="contact-form">
       <div class="form-group">
         <label>Nombre:</label>
@@ -388,7 +553,7 @@
       </div>
       <button class="btn-save" id="btnGuardarContacto">💾 Guardar Contacto</button>
     </div>
-    <h4 style="margin: 16px 0 8px; color: #2c3e50;">📇 Contactos guardados:</h4>
+    <h4 style="margin: 16px 0 8px; color: #2c3e50;"> Contactos guardados:</h4>
     <div class="contact-list" id="contactList"></div>
     <button class="modal-close" id="contactosClose">Cerrar</button>
   </div>
@@ -410,10 +575,53 @@
         <span>✉️</span><div><div>Email</div><small style="font-weight: normal; font-size: 0.8rem;">Abrir cliente de correo</small></div>
       </div>
       <div class="send-option copy" id="sendCopy">
-        <span></span><div><div>Copiar al portapapeles</div><small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small></div>
+        <span>📋</span><div><div>Copiar al portapapeles</div><small style="font-weight: normal; font-size: 0.8rem;">Para pegar donde quieras</small></div>
       </div>
     </div>
     <button class="modal-close" id="enviarClose">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL AJUSTES -->
+<div class="modal-overlay" id="modalAjustes">
+  <div class="modal">
+    <h3>⚙️ Ajustes</h3>
+    
+    <div class="ajuste-opcion">
+      <label>🔤 Tamaño de texto</label>
+      <select id="ajusteTamano">
+        <option value="chico">Chico</option>
+        <option value="normal" selected>Normal</option>
+        <option value="grande">Grande</option>
+      </select>
+    </div>
+    
+    <div class="ajuste-opcion">
+      <label>🌙 Modo oscuro</label>
+      <select id="ajusteModoOscuro">
+        <option value="0" selected>Desactivado</option>
+        <option value="1">Activado</option>
+      </select>
+    </div>
+    
+    <div class="ajuste-opcion">
+      <label>⏱️ Tiempo de escucha</label>
+      <select id="ajusteTiempo">
+        <option value="3000">Corto (3 seg)</option>
+        <option value="5000" selected>Normal (5 seg)</option>
+        <option value="7000">Largo (7 seg)</option>
+      </select>
+    </div>
+    
+    <div class="ajuste-opcion">
+      <label>🔊 Sonido al guardar</label>
+      <select id="ajusteSonido">
+        <option value="1" selected>Activado</option>
+        <option value="0">Desactivado</option>
+      </select>
+    </div>
+    
+    <button class="modal-close" id="ajustesClose">Guardar y Cerrar</button>
   </div>
 </div>
 
@@ -422,6 +630,7 @@
 <script>
   // ELEMENTOS DEL DOM
   const dialogText = document.getElementById('dialogText');
+  const dialogTextContainer = document.getElementById('dialogTextContainer');
   const dialogMeta = document.getElementById('dialogMeta');
   const editBadge = document.getElementById('editBadge');
   const btnMic = document.getElementById('btnMic');
@@ -432,11 +641,15 @@
   const btnSalir = document.getElementById('btnSalir');
   const btnCancelarGrabacion = document.getElementById('btnCancelarGrabacion');
   const btnListoEdicion = document.getElementById('btnListoEdicion');
+  const btnInstalar = document.getElementById('btnInstalar');
+  const btnLeer = document.getElementById('btnLeer');
+  const btnAjustes = document.getElementById('btnAjustes');
   const btnGestionarContactos = document.getElementById('btnGestionarContactos');
   const selectedContactDisplay = document.getElementById('selectedContactDisplay');
   const modalHistorial = document.getElementById('modalHistorial');
   const modalContactos = document.getElementById('modalContactos');
   const modalEnviar = document.getElementById('modalEnviar');
+  const modalAjustes = document.getElementById('modalAjustes');
   const historialList = document.getElementById('historialList');
   const contactList = document.getElementById('contactList');
   const toast = document.getElementById('toast');
@@ -445,6 +658,11 @@
   const contactPhone = document.getElementById('contactPhone');
   const contactEmail = document.getElementById('contactEmail');
   const btnGuardarContacto = document.getElementById('btnGuardarContacto');
+  
+  const ajusteTamano = document.getElementById('ajusteTamano');
+  const ajusteModoOscuro = document.getElementById('ajusteModoOscuro');
+  const ajusteTiempo = document.getElementById('ajusteTiempo');
+  const ajusteSonido = document.getElementById('ajusteSonido');
 
   // ESTADO
   let isRecording = false;
@@ -455,7 +673,116 @@
   let recognitionInstance = null;
   let startTime = 0;
   let textoAntesEdicion = '';
-  const TIEMPO_MINIMO_ESCUCHA = 5000; // 5 segundos mínimo
+  
+  // AJUSTES (cargados de localStorage)
+  let ajustes = JSON.parse(localStorage.getItem('ajustes') || '{}');
+  if (!ajustes.tamano) ajustes.tamano = 'normal';
+  if (!ajustes.modoOscuro) ajustes.modoOscuro = '0';
+  if (!ajustes.tiempo) ajustes.tiempo = '5000';
+  if (!ajustes.sonido) ajustes.sonido = '1';
+  
+  let TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
+
+  // ==========================================
+  // SONIDO DE CONFIRMACIÓN (Web Audio API)
+  // ==========================================
+  let audioCtx = null;
+  function obtenerAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      return audioCtx;
+    } catch(e) { return null; }
+  }
+  
+  function sonidoConfirmacion() {
+    if (ajustes.sonido !== '1') return;
+    const ctx = obtenerAudio();
+    if (!ctx) return;
+    
+    // Dos tonos suaves: "beep-beep"
+    const t = ctx.currentTime;
+    const o1 = ctx.createOscillator();
+    const g1 = ctx.createGain();
+    o1.connect(g1);
+    g1.connect(ctx.destination);
+    o1.type = 'sine';
+    o1.frequency.value = 880;
+    g1.gain.setValueAtTime(0.3, t);
+    g1.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+    o1.start(t);
+    o1.stop(t + 0.15);
+    
+    const o2 = ctx.createOscillator();
+    const g2 = ctx.createGain();
+    o2.connect(g2);
+    g2.connect(ctx.destination);
+    o2.type = 'sine';
+    o2.frequency.value = 1100;
+    g2.gain.setValueAtTime(0, t + 0.15);
+    g2.gain.linearRampToValueAtTime(0.3, t + 0.2);
+    g2.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+    o2.start(t + 0.15);
+    o2.stop(t + 0.35);
+  }
+  
+  // Inicializar audio con el primer toque
+  document.addEventListener('click', obtenerAudio, {once: true});
+  document.addEventListener('touchstart', obtenerAudio, {once: true});
+
+  // ==========================================
+  // LEER EN VOZ ALTA (SpeechSynthesis)
+  // ==========================================
+  function leerEnVozAlta() {
+    const texto = dialogText.textContent.trim();
+    if (!texto || texto === 'Presioná el micrófono para empezar...') {
+      showToast('⚠️ No hay texto para leer');
+      return;
+    }
+    
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(texto);
+      utterance.lang = 'es-ES';
+      utterance.rate = 0.9; // Un poco más lento para claridad
+      utterance.pitch = 1;
+      
+      utterance.onstart = () => {
+        btnLeer.textContent = '🔊 Leyendo...';
+        btnLeer.style.background = '#8e44ad';
+      };
+      utterance.onend = () => {
+        btnLeer.textContent = '🔊 Leer';
+        btnLeer.style.background = '#9b59b6';
+      };
+      
+      window.speechSynthesis.speak(utterance);
+      showToast('🔊 Leyendo en voz alta...');
+    } else {
+      showToast('⚠️ Tu navegador no soporta lectura en voz alta');
+    }
+  }
+  
+  btnLeer.addEventListener('click', () => {
+    // Si ya está leyendo, parar
+    if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      btnLeer.textContent = '🔊 Leer';
+      btnLeer.style.background = '#9b59b6';
+      showToast('🔇 Lectura detenida');
+    } else {
+      leerEnVozAlta();
+    }
+  });
+
+  // ==========================================
+  // SCROLL AUTOMÁTICO
+  // ==========================================
+  function scrollAlFinal() {
+    setTimeout(() => {
+      dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight;
+    }, 50);
+  }
 
   function showToast(msg) {
     toast.textContent = msg;
@@ -464,11 +791,35 @@
   }
 
   // ==========================================
+  // BOTÓN INSTALAR PWA
+  // ==========================================
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    btnInstalar.classList.add('show');
+  });
+  
+  btnInstalar.addEventListener('click', async () => {
+    if (!deferredPrompt) {
+      showToast('️ La app ya está instalada o no es compatible');
+      return;
+    }
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      showToast('✅ ¡App instalada!');
+    }
+    deferredPrompt = null;
+    btnInstalar.classList.remove('show');
+  });
+
+  // ==========================================
   // BOTÓN CANCELAR GRABACIÓN
   // ==========================================
   btnCancelarGrabacion.addEventListener('click', () => {
     if (isRecording) {
-      detenerMicrofono(true); // true = cancelar sin guardar
+      detenerMicrofono(true);
       showToast('❌ Grabación cancelada');
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
@@ -486,7 +837,54 @@
   });
 
   // ==========================================
-  // DICTADO CON TIEMPO MÍNIMO DE ESCUCHA
+  // MODAL AJUSTES
+  // ==========================================
+  btnAjustes.addEventListener('click', () => {
+    // Cargar valores actuales
+    ajusteTamano.value = ajustes.tamano;
+    ajusteModoOscuro.value = ajustes.modoOscuro;
+    ajusteTiempo.value = ajustes.tiempo;
+    ajusteSonido.value = ajustes.sonido;
+    modalAjustes.classList.add('show');
+  });
+  
+  document.getElementById('ajustesClose').addEventListener('click', () => {
+    // Guardar ajustes
+    ajustes.tamano = ajusteTamano.value;
+    ajustes.modoOscuro = ajusteModoOscuro.value;
+    ajustes.tiempo = ajusteTiempo.value;
+    ajustes.sonido = ajusteSonido.value;
+    localStorage.setItem('ajustes', JSON.stringify(ajustes));
+    
+    // Aplicar ajustes
+    aplicarAjustes();
+    
+    modalAjustes.classList.remove('show');
+    showToast('✅ Ajustes guardados');
+  });
+  
+  modalAjustes.addEventListener('click', (e) => {
+    if (e.target === modalAjustes) modalAjustes.classList.remove('show');
+  });
+  
+  function aplicarAjustes() {
+    // Tamaño de texto
+    dialogText.classList.remove('texto-chico', 'texto-normal', 'texto-grande');
+    dialogText.classList.add('texto-' + ajustes.tamano);
+    
+    // Modo oscuro
+    if (ajustes.modoOscuro === '1') {
+      document.body.classList.add('modo-oscuro');
+    } else {
+      document.body.classList.remove('modo-oscuro');
+    }
+    
+    // Tiempo de escucha
+    TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
+  }
+
+  // ==========================================
+  // DICTADO
   // ==========================================
   function activarMicrofono() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -535,6 +933,8 @@
         dialogText.textContent = textoFinal;
         dialogMeta.textContent = '✅ Guardado automáticamente. Tocá el mic de nuevo para seguir.';
         showToast('✅ Guardado automáticamente');
+        sonidoConfirmacion(); // 👈 SONIDO DE CONFIRMACIÓN
+        scrollAlFinal();
         
         if (textoFinal.length > 3) {
            historial.unshift({
@@ -558,7 +958,7 @@
       const tiempoTranscurrido = Date.now() - startTime;
       
       if (tiempoTranscurrido < TIEMPO_MINIMO_ESCUCHA && isRecording) {
-        dialogMeta.textContent = ' Habla con calma, estoy escuchando...';
+        dialogMeta.textContent = '⏳ Habla con calma, estoy escuchando...';
         setTimeout(() => {
           if (isRecording) {
             try {
@@ -598,7 +998,6 @@
     }
   }
 
-  // Event Listeners
   btnMic.addEventListener('click', () => {
     activarMicrofono();
   });
@@ -642,14 +1041,14 @@
     }
   });
 
-  // --- FUNCIONES DE HISTORIAL ---
+  // --- HISTORIAL ---
   function renderHistorial() {
     if (historial.length === 0) {
       historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">Aún no hay transcripciones</p>';
     } else {
       historialList.innerHTML = historial.map((item, i) => 
         `<div class="historial-item" data-index="${i}">
-          <div class="historial-time">🕐 ${item.time}</div>
+          <div class="historial-time"> ${item.time}</div>
           <div class="historial-text">"${item.text}"</div>
         </div>`
       ).join('');
@@ -660,6 +1059,7 @@
           dialogText.textContent = historial[idx].text;
           dialogMeta.textContent = 'Cargado • ' + historial[idx].time;
           modalHistorial.classList.remove('show');
+          scrollAlFinal();
           showToast('📋 Texto cargado');
         });
       });
@@ -675,14 +1075,14 @@
     if (e.target === modalHistorial) modalHistorial.classList.remove('show');
   });
 
-  // --- FUNCIONES DE CONTACTOS ---
+  // --- CONTACTOS ---
   btnGuardarContacto.addEventListener('click', () => {
     const name = contactName.value.trim();
     const phone = contactPhone.value.trim();
     const email = contactEmail.value.trim();
     
     if (!name || (!phone && !email)) {
-      showToast('️ Completá al menos nombre y teléfono o email');
+      showToast('⚠️ Completá al menos nombre y teléfono o email');
       return;
     }
     
@@ -718,7 +1118,7 @@
           const contacto = contactos.find(c => c.id === parseInt(el.dataset.id));
           if (contacto) {
             contactoSeleccionado = contacto;
-            selectedContactDisplay.textContent = ` ${contacto.name}`;
+            selectedContactDisplay.textContent = `👤 ${contacto.name}`;
             selectedContactDisplay.classList.add('show');
             modalContactos.classList.remove('show');
             showToast(`📇 ${contacto.name} seleccionado`);
@@ -751,7 +1151,7 @@
     if (e.target === modalContactos) modalContactos.classList.remove('show');
   });
 
-  // --- FUNCIONES DE ENVÍO ---
+  // --- ENVIAR ---
   document.getElementById('sendWhatsApp').addEventListener('click', () => {
     const text = encodeURIComponent(dialogText.textContent.trim());
     let url = 'https://wa.me/';
@@ -807,6 +1207,11 @@
     slides.style.transform = `translateX(-${currentSlide * 100}%)`;
     dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
   }, 3500);
+
+  // ==========================================
+  // INICIALIZACIÓN: Aplicar ajustes guardados
+  // ==========================================
+  aplicarAjustes();
 </script>
 
 </body>
