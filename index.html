@@ -585,7 +585,7 @@
 <!-- MODAL AJUSTES -->
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
-    <h3>⚙️ Ajustes</h3>
+    <h3>️ Ajustes</h3>
     
     <div class="ajuste-opcion">
       <label>🔤 Tamaño de texto</label>
@@ -621,6 +621,23 @@
       </select>
     </div>
     
+    <div class="ajuste-opcion">
+      <label>🐢 Velocidad de lectura</label>
+      <select id="ajusteVelocidad">
+        <option value="0.6">Muy lenta</option>
+        <option value="0.75" selected>Normal lenta</option>
+        <option value="0.9">Poco lenta</option>
+        <option value="1">Normal</option>
+      </select>
+    </div>
+    
+    <div class="ajuste-opcion">
+      <label>🗣️ Voz para leer</label>
+      <select id="ajusteVoz">
+        <option value="auto">Automática (recomendado)</option>
+      </select>
+    </div>
+    
     <button class="modal-close" id="ajustesClose">Guardar y Cerrar</button>
   </div>
 </div>
@@ -628,7 +645,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ELEMENTOS DEL DOM
+// ELEMENTOS DEL DOM
   const dialogText = document.getElementById('dialogText');
   const dialogTextContainer = document.getElementById('dialogTextContainer');
   const dialogMeta = document.getElementById('dialogMeta');
@@ -674,17 +691,58 @@
   let startTime = 0;
   let textoAntesEdicion = '';
   
-  // AJUSTES (cargados de localStorage)
+  // AJUSTES
   let ajustes = JSON.parse(localStorage.getItem('ajustes') || '{}');
   if (!ajustes.tamano) ajustes.tamano = 'normal';
   if (!ajustes.modoOscuro) ajustes.modoOscuro = '0';
   if (!ajustes.tiempo) ajustes.tiempo = '5000';
   if (!ajustes.sonido) ajustes.sonido = '1';
+  if (!ajustes.velocidadLectura) ajustes.velocidadLectura = '0.75';
+  if (!ajustes.vozPreferida) ajustes.vozPreferida = 'auto';
   
   let TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
+  let vocesDisponibles = [];
 
   // ==========================================
-  // SONIDO DE CONFIRMACIÓN (Web Audio API)
+  // CARGAR VOCES DISPONIBLES
+  // ==========================================
+  function cargarVoces() {
+    if ('speechSynthesis' in window) {
+      vocesDisponibles = window.speechSynthesis.getVoices();
+    }
+  }
+  
+  // Las voces se cargan de forma asíncrona
+  if ('speechSynthesis' in window) {
+    cargarVoces();
+    window.speechSynthesis.onvoiceschanged = cargarVoces;
+  }
+
+  function buscarMejorVoz() {
+    if (vocesDisponibles.length === 0) return null;
+    
+    // 1. Buscar voz argentina específicamente
+    let voz = vocesDisponibles.find(v => 
+      v.lang === 'es-AR' || v.lang.startsWith('es-AR')
+    );
+    if (voz) return voz;
+    
+    // 2. Buscar voz latinoamericana (es-MX, es-419, es-US)
+    voz = vocesDisponibles.find(v => 
+      v.lang === 'es-MX' || v.lang === 'es-419' || v.lang === 'es-US'
+    );
+    if (voz) return voz;
+    
+    // 3. Cualquier voz en español
+    voz = vocesDisponibles.find(v => v.lang.startsWith('es'));
+    if (voz) return voz;
+    
+    // 4. Default
+    return null;
+  }
+
+  // ==========================================
+  // SONIDO DE CONFIRMACIÓN
   // ==========================================
   let audioCtx = null;
   function obtenerAudio() {
@@ -700,7 +758,6 @@
     const ctx = obtenerAudio();
     if (!ctx) return;
     
-    // Dos tonos suaves: "beep-beep"
     const t = ctx.currentTime;
     const o1 = ctx.createOscillator();
     const g1 = ctx.createGain();
@@ -726,12 +783,11 @@
     o2.stop(t + 0.35);
   }
   
-  // Inicializar audio con el primer toque
   document.addEventListener('click', obtenerAudio, {once: true});
   document.addEventListener('touchstart', obtenerAudio, {once: true});
 
   // ==========================================
-  // LEER EN VOZ ALTA (SpeechSynthesis)
+  // LEER EN VOZ ALTA (MEJORADO)
   // ==========================================
   function leerEnVozAlta() {
     const texto = dialogText.textContent.trim();
@@ -740,36 +796,55 @@
       return;
     }
     
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(texto);
-      utterance.lang = 'es-ES';
-      utterance.rate = 0.9; // Un poco más lento para claridad
-      utterance.pitch = 1;
-      
-      utterance.onstart = () => {
-        btnLeer.textContent = '🔊 Leyendo...';
-        btnLeer.style.background = '#8e44ad';
-      };
-      utterance.onend = () => {
-        btnLeer.textContent = '🔊 Leer';
-        btnLeer.style.background = '#9b59b6';
-      };
-      
-      window.speechSynthesis.speak(utterance);
-      showToast('🔊 Leyendo en voz alta...');
-    } else {
+    if (!('speechSynthesis' in window)) {
       showToast('⚠️ Tu navegador no soporta lectura en voz alta');
+      return;
     }
+    
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(texto);
+    
+    // Velocidad más lenta (0.75 = 25% más lento)
+    utterance.rate = parseFloat(ajustes.velocidadLectura) || 0.75;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    
+    // Seleccionar la mejor voz disponible
+    const voz = buscarMejorVoz();
+    if (voz) {
+      utterance.voice = voz;
+      utterance.lang = voz.lang;
+      console.log('Usando voz:', voz.name, voz.lang);
+    } else {
+      utterance.lang = 'es-AR'; // Fallback
+    }
+    
+    utterance.onstart = () => {
+      btnLeer.textContent = '🔊 Leyendo...';
+      btnLeer.style.background = '#8e44ad';
+    };
+    
+    utterance.onend = () => {
+      btnLeer.textContent = '🔊 Leer';
+      btnLeer.style.background = '#9b59b6';
+    };
+    
+    utterance.onerror = () => {
+      btnLeer.textContent = '🔊 Leer';
+      btnLeer.style.background = '#9b59b6';
+      showToast('⚠️ Error al leer');
+    };
+    
+    window.speechSynthesis.speak(utterance);
+    showToast('🔊 Leyendo en voz alta...');
   }
   
   btnLeer.addEventListener('click', () => {
-    // Si ya está leyendo, parar
     if ('speechSynthesis' in window && window.speechSynthesis.speaking) {
       window.speechSynthesis.cancel();
       btnLeer.textContent = '🔊 Leer';
       btnLeer.style.background = '#9b59b6';
-      showToast('🔇 Lectura detenida');
+      showToast(' Lectura detenida');
     } else {
       leerEnVozAlta();
     }
@@ -814,21 +889,15 @@
     btnInstalar.classList.remove('show');
   });
 
-  // ==========================================
-  // BOTÓN CANCELAR GRABACIÓN
-  // ==========================================
   btnCancelarGrabacion.addEventListener('click', () => {
     if (isRecording) {
       detenerMicrofono(true);
-      showToast('❌ Grabación cancelada');
+      showToast(' Grabación cancelada');
       dialogText.textContent = 'Presioná el micrófono para empezar...';
       dialogMeta.textContent = 'Listo para dictar';
     }
   });
 
-  // ==========================================
-  // BOTÓN LISTO EDICIÓN
-  // ==========================================
   btnListoEdicion.addEventListener('click', () => {
     if (isEditing) {
       toggleEdit();
@@ -837,26 +906,54 @@
   });
 
   // ==========================================
-  // MODAL AJUSTES
+  // MODAL AJUSTES (ACTUALIZADO)
   // ==========================================
   btnAjustes.addEventListener('click', () => {
-    // Cargar valores actuales
     ajusteTamano.value = ajustes.tamano;
     ajusteModoOscuro.value = ajustes.modoOscuro;
     ajusteTiempo.value = ajustes.tiempo;
     ajusteSonido.value = ajustes.sonido;
+    
+    // Cargar selector de velocidad
+    const ajusteVelocidad = document.getElementById('ajusteVelocidad');
+    if (ajusteVelocidad) {
+      ajusteVelocidad.value = ajustes.velocidadLectura;
+    }
+    
+    // Cargar selector de voz
+    const ajusteVoz = document.getElementById('ajusteVoz');
+    if (ajusteVoz) {
+      // Llenar con voces disponibles
+      ajusteVoz.innerHTML = '<option value="auto">Automática (recomendado)</option>';
+      vocesDisponibles.filter(v => v.lang.startsWith('es')).forEach(v => {
+        const option = document.createElement('option');
+        option.value = v.name;
+        option.textContent = `${v.name} (${v.lang})`;
+        if (v.name === ajustes.vozPreferida) option.selected = true;
+        ajusteVoz.appendChild(option);
+      });
+    }
+    
     modalAjustes.classList.add('show');
   });
   
   document.getElementById('ajustesClose').addEventListener('click', () => {
-    // Guardar ajustes
     ajustes.tamano = ajusteTamano.value;
     ajustes.modoOscuro = ajusteModoOscuro.value;
     ajustes.tiempo = ajusteTiempo.value;
     ajustes.sonido = ajusteSonido.value;
-    localStorage.setItem('ajustes', JSON.stringify(ajustes));
     
-    // Aplicar ajustes
+    const ajusteVelocidad = document.getElementById('ajusteVelocidad');
+    if (ajusteVelocidad) {
+      ajustes.velocidadLectura = ajusteVelocidad.value;
+    }
+    
+    const ajusteVoz = document.getElementById('ajusteVoz');
+    if (ajusteVoz) {
+      ajustes.vozPreferida = ajusteVoz.value;
+    }
+    
+    localStorage.setItem('ajustes', JSON.stringify(ajustes));
     aplicarAjustes();
     
     modalAjustes.classList.remove('show');
@@ -868,18 +965,15 @@
   });
   
   function aplicarAjustes() {
-    // Tamaño de texto
     dialogText.classList.remove('texto-chico', 'texto-normal', 'texto-grande');
     dialogText.classList.add('texto-' + ajustes.tamano);
     
-    // Modo oscuro
     if (ajustes.modoOscuro === '1') {
       document.body.classList.add('modo-oscuro');
     } else {
       document.body.classList.remove('modo-oscuro');
     }
     
-    // Tiempo de escucha
     TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
   }
 
@@ -902,7 +996,7 @@
     startTime = Date.now();
     btnMic.classList.add('recording');
     btnCancelarGrabacion.classList.add('show');
-    dialogMeta.textContent = '🎙️ Habla con calma, estoy escuchando...';
+    dialogMeta.textContent = '️ Habla con calma, estoy escuchando...';
     
     if (dialogText.textContent === 'Presioná el micrófono para empezar...') {
       dialogText.textContent = '';
@@ -933,7 +1027,7 @@
         dialogText.textContent = textoFinal;
         dialogMeta.textContent = '✅ Guardado automáticamente. Tocá el mic de nuevo para seguir.';
         showToast('✅ Guardado automáticamente');
-        sonidoConfirmacion(); // 👈 SONIDO DE CONFIRMACIÓN
+        sonidoConfirmacion();
         scrollAlFinal();
         
         if (textoFinal.length > 3) {
@@ -1041,14 +1135,13 @@
     }
   });
 
-  // --- HISTORIAL ---
   function renderHistorial() {
     if (historial.length === 0) {
       historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">Aún no hay transcripciones</p>';
     } else {
       historialList.innerHTML = historial.map((item, i) => 
         `<div class="historial-item" data-index="${i}">
-          <div class="historial-time"> ${item.time}</div>
+          <div class="historial-time">🕐 ${item.time}</div>
           <div class="historial-text">"${item.text}"</div>
         </div>`
       ).join('');
@@ -1060,7 +1153,7 @@
           dialogMeta.textContent = 'Cargado • ' + historial[idx].time;
           modalHistorial.classList.remove('show');
           scrollAlFinal();
-          showToast('📋 Texto cargado');
+          showToast(' Texto cargado');
         });
       });
     }
@@ -1075,7 +1168,6 @@
     if (e.target === modalHistorial) modalHistorial.classList.remove('show');
   });
 
-  // --- CONTACTOS ---
   btnGuardarContacto.addEventListener('click', () => {
     const name = contactName.value.trim();
     const phone = contactPhone.value.trim();
@@ -1118,7 +1210,7 @@
           const contacto = contactos.find(c => c.id === parseInt(el.dataset.id));
           if (contacto) {
             contactoSeleccionado = contacto;
-            selectedContactDisplay.textContent = `👤 ${contacto.name}`;
+            selectedContactDisplay.textContent = ` ${contacto.name}`;
             selectedContactDisplay.classList.add('show');
             modalContactos.classList.remove('show');
             showToast(`📇 ${contacto.name} seleccionado`);
@@ -1151,7 +1243,6 @@
     if (e.target === modalContactos) modalContactos.classList.remove('show');
   });
 
-  // --- ENVIAR ---
   document.getElementById('sendWhatsApp').addEventListener('click', () => {
     const text = encodeURIComponent(dialogText.textContent.trim());
     let url = 'https://wa.me/';
@@ -1197,7 +1288,6 @@
     if (e.target === modalEnviar) modalEnviar.classList.remove('show');
   });
 
-  // --- SLIDER PUBLICIDAD ---
   let currentSlide = 0;
   const slides = document.getElementById('adSlides');
   const dots = document.querySelectorAll('.ad-dot');
@@ -1208,9 +1298,6 @@
     dots.forEach((d, i) => d.classList.toggle('active', i === currentSlide));
   }, 3500);
 
-  // ==========================================
-  // INICIALIZACIÓN: Aplicar ajustes guardados
-  // ==========================================
   aplicarAjustes();
 </script>
 
