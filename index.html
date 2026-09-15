@@ -688,51 +688,55 @@
   }
 
   function buscarYAbrirEntrada(termino) {
-    const t = termino.toLowerCase().trim();
-    let encontrada = entradas.find(e => 
-      e.categoria.toLowerCase().includes(t) || e.titulo.toLowerCase().includes(t)
-    );
-    
-    if (!encontrada) {
-      const tituloFinal = termino.charAt(0).toUpperCase() + termino.slice(1);
-      crearNuevaEntrada(tituloFinal, mapearCategoría(termino));
-      showToast(`📝 Creado: ${tituloFinal}`);
-    } else {
-      cargarEntrada(encontrada.id);
-      showToast(`📂 Abierto: ${encontrada.titulo}`);
-    }
+  const t = termino.toLowerCase().trim();
+  let encontrada = entradas.find(e => 
+    e.categoria.toLowerCase().includes(t) || e.titulo.toLowerCase().includes(t)
+  );
+  
+  if (!encontrada) {
+    const tituloFinal = termino.charAt(0).toUpperCase() + termino.slice(1);
+    crearNuevaEntrada(tituloFinal, mapearCategoría(termino));
+    showToast(`📝 Creado: ${tituloFinal}`);
+  } else {
+    cargarEntrada(encontrada.id);
+    showToast(`📂 Abierto: ${encontrada.titulo}`);
   }
+}
 
   function procesarComandoDeVoz(texto) {
-    const t = texto.toLowerCase().trim();
-    
-    if (t.includes("nueva entrada") || t.includes("crear mensaje") || t.includes("crear nota")) {
-      crearNuevaEntrada("Nueva entrada", "Sin categoría");
-      return;
-    }
-    
-    if (t.startsWith("buscar ") || t.startsWith("abrir ")) {
-      const termino = t.replace(/^(buscar |abrir )/, '').trim();
-      buscarYAbrirEntrada(termino);
-      return;
-    }
-    
-    if (t.includes("guardar")) {
-      guardarEntradasEnStorage();
-      showToast("✅ Guardado manualmente");
-      return;
-    }
-    if (t.includes("exportar") || t.includes("pdf")) {
-      exportarAPDF();
-      return;
-    }
-    if (t.includes("leer")) {
-      leerEnVozAlta();
-      return;
-    }
-    
-    agregarTextoAEntradaActual(texto);
+  const t = texto.toLowerCase().trim();
+  
+  // 1. Comandos de creación
+  if (t.includes("nueva entrada") || t.includes("crear mensaje") || t.includes("crear nota")) {
+    crearNuevaEntrada("Nueva entrada", "Sin categoría");
+    return; // <-- IMPORTANTE: Evita que agregue el texto
   }
+  
+  // 2. Comandos de búsqueda/apertura
+  if (t.startsWith("buscar ") || t.startsWith("abrir ")) {
+    const termino = t.replace(/^(buscar |abrir )/, '').trim();
+    buscarYAbrirEntrada(termino);
+    return; // <-- IMPORTANTE: Evita que agregue el texto
+  }
+  
+  // 3. Comandos de acción
+  if (t.includes("guardar")) {
+    guardarEntradasEnStorage();
+    showToast("✅ Guardado manualmente");
+    return;
+  }
+  if (t.includes("exportar") || t.includes("pdf")) {
+    exportarAPDF();
+    return;
+  }
+  if (t.includes("leer")) {
+    leerEnVozAlta();
+    return;
+  }
+  
+  // 4. Si NO es comando, es texto para agregar
+  agregarTextoAEntradaActual(texto);
+}
 
   function exportarAPDF() {
     const entrada = entradas.find(e => e.id === entradaActualId);
