@@ -248,6 +248,16 @@
     padding: 10px 16px; background: #27ae60; color: white; border: none;
     border-radius: 8px; font-weight: 600; cursor: pointer;
   }
+
+  /* ESTILOS PARA DICTADO PRO */
+  .texto-provisional {
+    color: #95a5a6;
+    font-style: italic;
+  }
+  .estado-dictado {
+    font-weight: bold;
+    color: #e74c3c;
+  }
 </style>
 </head>
 <body>
@@ -255,21 +265,21 @@
 <div class="app-container">
   <div class="dialog-box">
     <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
-    <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion"> Cancelar</button>
+    <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion">✖ Cancelar</button>
     <button class="btn-listo-edicion" id="btnListoEdicion">✓ Listo</button>
     <button class="btn-nuevo-flotante" id="btnNuevoFlotante">➕ Nuevo</button>
     <div class="edit-badge" id="editBadge">✏️ Editando</div>
     
     <div class="dialog-text-container" id="dialogTextContainer">
-      <p class="dialog-text texto-normal" id="dialogText">Presioná el micrófono y decí "Crear mensaje" o empezá a dictar...</p>
+      <p class="dialog-text texto-normal" id="dialogText">Presioná el micrófono y empezá a dictar...</p>
     </div>
-    <p class="dialog-meta" id="dialogMeta">📂 Categoría: Sin categoría | 📝 Nuevo</p>
+    <p class="dialog-meta" id="dialogMeta"> Categoría: Sin categoría | 📝 Nuevo</p>
   </div>
 
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHistorial">📋 Historial</button>
+        <button class="btn-side" id="btnHistorial"> Historial</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
@@ -286,7 +296,7 @@
         <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnPDF">📄 PDF</button>
+        <button class="btn-side" id="btnPDF"> PDF</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnLeer">🔊 Leer</button>
@@ -316,7 +326,7 @@
 <!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
-    <h3>📋 Mis Escritos</h3>
+    <h3> Mis Escritos</h3>
     <div class="filtro-container">
       <input type="text" id="filtroBusqueda" placeholder="🔍 Buscar por título...">
       <select id="filtroCategoria">
@@ -328,13 +338,13 @@
   </div>
 </div>
 
-<!-- MODAL CATEGORÍA (con gestión) -->
+<!-- MODAL CATEGORÍA -->
 <div class="modal-overlay" id="modalCategoria">
   <div class="modal">
     <h3>📂 Elegir Categoría</h3>
     <div id="listaCategoriasElegir" style="display: flex; flex-direction: column; gap: 8px;"></div>
     
-    <h4>️ Gestionar categorías</h4>
+    <h4>⚙️ Gestionar categorías</h4>
     <div id="listaCategoriasGestionar" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
     
     <div class="nueva-cat-form">
@@ -349,7 +359,7 @@
 <!-- MODAL AJUSTES -->
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
-    <h3>️ Ajustes</h3>
+    <h3>⚙️ Ajustes</h3>
     
     <div class="ajuste-opcion">
       <label>🔤 Tamaño de texto</label>
@@ -361,7 +371,7 @@
     </div>
     
     <div class="ajuste-opcion">
-      <label>🌙 Modo oscuro</label>
+      <label> Modo oscuro</label>
       <select id="ajusteModoOscuro">
         <option value="0" selected>Desactivado</option>
         <option value="1">Activado</option>
@@ -440,14 +450,20 @@
   }
 
   // ==========================================
-  // ENTRADAS Y ESTADO
+  // ESTADO (DICTADO PRO)
   // ==========================================
   let entradas = JSON.parse(localStorage.getItem('escribo_x_mi_entradas') || '[]');
   let entradaActualId = null;
+  
+  // Estado del dictado Pro
   let isRecording = false;
+  let dictando = false;
+  let reinicioPendiente = false;
+  let textoConfirmado = "";
+  let textoProvisional = "";
+  
   let isEditing = false;
   let recognitionInstance = null;
-  let startTime = 0;
   let vocesDisponibles = [];
   
   let ajustes = JSON.parse(localStorage.getItem('escribo_x_mi_ajustes') || '{}');
@@ -537,7 +553,7 @@
     entradas.unshift(nueva);
     guardarEntradasEnStorage();
     actualizarVistaEntrada();
-    showToast(` Creado: ${titulo}`);
+    showToast(`📝 Creado: ${titulo}`);
   }
 
   function cargarEntrada(id) {
@@ -554,37 +570,17 @@
       const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
       dialogMeta.textContent = `📂 Categoría: ${entrada.categoria} | 📝 Modificado: ${fecha}`;
       if (dialogText.textContent === "") {
-        dialogText.textContent = "Presioná el micrófono y decí 'Crear mensaje' o empezá a dictar...";
+        dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
       }
     } else {
-      dialogText.textContent = "Presioná el micrófono y decí 'Crear mensaje' o empezá a dictar...";
-      dialogMeta.textContent = " Categoría: Sin categoría | 📝 Nuevo";
+      dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
+      dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
     }
     scrollAlFinal();
   }
 
-  function agregarTextoAEntradaActual(texto) {
-    if (!entradaActualId) {
-      crearNuevaEntrada("Nueva entrada", "Sin categoría");
-    }
-    const entrada = entradas.find(e => e.id === entradaActualId);
-    if (entrada) {
-      if (entrada.contenido === "" || entrada.contenido.includes("Presioná el micrófono")) {
-        entrada.contenido = texto;
-      } else {
-        entrada.contenido += "\n\n" + texto;
-      }
-      entrada.fechaModificacion = new Date().toISOString();
-      guardarEntradasEnStorage();
-      actualizarVistaEntrada();
-      sonidoConfirmacion();
-      showToast("✅ Texto agregado");
-    }
-  }
-
   function mapearCategoría(termino) {
     const t = termino.toLowerCase();
-    // Buscar en categorías existentes
     const catEncontrada = categorias.find(c => t.includes(c.nombre.toLowerCase()));
     if (catEncontrada) return catEncontrada.nombre;
     
@@ -608,46 +604,241 @@
       showToast(`📝 Creado: ${tituloFinal}`);
     } else {
       cargarEntrada(encontrada.id);
-      showToast(`📂 Abierto: ${encontrada.titulo}`);
+      showToast(` Abierto: ${encontrada.titulo}`);
     }
   }
 
   // ==========================================
-  // COMANDO DE VOZ (LIMPIO - con returns)
+  // MOTOR DE DICTADO PRO
   // ==========================================
-  function procesarComandoDeVoz(texto) {
-    const t = texto.toLowerCase().trim();
-    
-    // Comandos de creación
-    if (t.includes("nueva entrada") || t.includes("crear mensaje") || t.includes("crear nota")) {
-      crearNuevaEntrada("Nueva entrada", "Sin categoría");
-      return;
+  function unirTexto(base, nuevo) {
+    if (!base) return nuevo;
+    if (!nuevo) return base;
+    const separador = /[\s.,;:!?¿¡]$/.test(base) ? "" : " ";
+    return base + separador + nuevo;
+  }
+
+  function renderizarDictado() {
+    if (textoProvisional) {
+      dialogText.innerHTML = textoConfirmado + ' <span class="texto-provisional">' + textoProvisional + '</span>';
+    } else {
+      dialogText.textContent = textoConfirmado || "Presioná el micrófono y empezá a dictar...";
     }
-    
-    // Comandos de búsqueda/apertura
+    scrollAlFinal();
+  }
+
+  function esComandoExacto(t) {
+    // Comandos de creación (exactos)
+    if (t === "crear mensaje" || t === "nueva entrada" || t === "crear nota" || t === "nuevo mensaje") {
+      return { tipo: 'crear', accion: 'crear' };
+    }
+    // Comandos de búsqueda (empiezan con buscar/abrir)
     if (t.startsWith("buscar ") || t.startsWith("abrir ")) {
       const termino = t.replace(/^(buscar |abrir )/, '').trim();
-      buscarYAbrirEntrada(termino);
+      if (termino) return { tipo: 'buscar', termino: termino };
+    }
+    // Comandos de acción (exactos o con palabra clave)
+    if (t === "leer" || t === "leer en voz alta" || t.includes("leer todo")) {
+      return { tipo: 'accion', accion: 'leer' };
+    }
+    if (t === "guardar" || t === "guardar entrada") {
+      return { tipo: 'accion', accion: 'guardar' };
+    }
+    if (t === "pdf" || t === "exportar" || t === "exportar a pdf" || t === "generar pdf") {
+      return { tipo: 'accion', accion: 'pdf' };
+    }
+    if (t === "nueva categoría" || t === "crear categoría") {
+      return { tipo: 'accion', accion: 'nueva_categoria' };
+    }
+    return null;
+  }
+
+  function ejecutarComando(comando) {
+    switch (comando.accion) {
+      case 'crear':
+        crearNuevaEntrada("Nueva entrada", "Sin categoría");
+        textoConfirmado = "";
+        break;
+      case 'leer':
+        leerEnVozAlta();
+        break;
+      case 'guardar':
+        const entradaGuard = entradas.find(e => e.id === entradaActualId);
+        if (entradaGuard) {
+          entradaGuard.contenido = textoConfirmado;
+          entradaGuard.fechaModificacion = new Date().toISOString();
+          guardarEntradasEnStorage();
+        }
+        showToast("✅ Guardado manualmente");
+        break;
+      case 'pdf':
+        // Guardar primero y luego exportar
+        const entradaPdf = entradas.find(e => e.id === entradaActualId);
+        if (entradaPdf) {
+          entradaPdf.contenido = textoConfirmado;
+          entradaPdf.fechaModificacion = new Date().toISOString();
+          guardarEntradasEnStorage();
+        }
+        exportarAPDF();
+        break;
+      case 'nueva_categoria':
+        btnCategoria.click();
+        break;
+    }
+    if (comando.tipo === 'buscar') {
+      buscarYAbrirEntrada(comando.termino);
+      textoConfirmado = "";
+    }
+  }
+
+  function activarMicrofono() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      showToast("Dictado no disponible en este navegador");
       return;
+    }
+
+    // Si ya está dictando, el segundo toque lo detiene y guarda
+    if (isRecording) {
+      detenerDictadoPro();
+      return;
+    }
+
+    // Si está en modo edición, salir primero
+    if (isEditing) {
+      btnCorregir.click();
+    }
+
+    // Iniciar modo dictado continuo
+    isRecording = true;
+    dictando = true;
+    textoConfirmado = "";
+    textoProvisional = "";
+    btnMic.classList.add('recording');
+    btnCancelarGrabacion.classList.add('show');
+    dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado continuo activo. Tocá de nuevo para finalizar.</span>';
+    
+    if (!entradaActualId) {
+      crearNuevaEntrada("Nota de voz", "Sin categoría");
+    }
+
+    iniciarReconocimientoPro();
+  }
+
+  function iniciarReconocimientoPro() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognitionInstance = new SR();
+    
+    // CONFIGURACIÓN CLAVE DEL MÓDULO PRO
+    recognitionInstance.lang = 'es-AR';
+    recognitionInstance.continuous = false;
+    recognitionInstance.interimResults = true;
+    recognitionInstance.maxAlternatives = 1;
+    
+    recognitionInstance.onstart = () => {
+      btnMic.classList.add('recording');
+      if (dictando) {
+        dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>';
+      }
+    };
+
+    recognitionInstance.onresult = (event) => {
+      textoProvisional = "";
+
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        const resultado = event.results[i];
+        const texto = resultado[0].transcript.trim();
+
+        if (!texto) continue;
+
+        if (resultado.isFinal) {
+          // Verificar si es un comando
+          const comando = esComandoExacto(texto.toLowerCase());
+          if (comando) {
+            ejecutarComando(comando);
+            textoProvisional = "";
+          } else {
+            // Agregar al texto confirmado
+            textoConfirmado = unirTexto(textoConfirmado, texto);
+          }
+          textoProvisional = "";
+        } else {
+          textoProvisional = unirTexto(textoProvisional, texto);
+        }
+      }
+      renderizarDictado();
+    };
+
+    recognitionInstance.onerror = (event) => {
+      if (event.error === 'no-speech') {
+        return;
+      }
+      if (event.error === 'not-allowed') {
+        showToast('⚠️ Necesitás habilitar el micrófono');
+        detenerDictadoPro();
+        return;
+      }
+      if (event.error === 'network') {
+        showToast('⚠️ El dictado requiere conexión a internet');
+        detenerDictadoPro();
+      }
+    };
+
+    recognitionInstance.onend = () => {
+      if (dictando) {
+        dialogMeta.innerHTML = '<span class="estado-dictado">⏳ Pausa detectada, continuando...</span>';
+        setTimeout(() => {
+          if (dictando && !reinicioPendiente) {
+            try {
+              recognitionInstance.start();
+            } catch (e) {
+              console.warn('Reinicio automático falló');
+              dialogMeta.innerHTML = '<span class="estado-dictado">️ Tocá el mic para continuar</span>';
+            }
+          }
+        }, 250);
+      }
+    };
+
+    try {
+      recognitionInstance.start();
+    } catch(e) {
+      console.error('Error al iniciar:', e);
+      detenerDictadoPro();
+    }
+  }
+
+  function detenerDictadoPro() {
+    isRecording = false;
+    dictando = false;
+    reinicioPendiente = false;
+    textoProvisional = "";
+    
+    btnMic.classList.remove('recording');
+    btnCancelarGrabacion.classList.remove('show');
+    
+    if (recognitionInstance) {
+      try { recognitionInstance.stop(); } catch(e) {}
     }
     
-    // Comandos de acción
-    if (t.includes("guardar")) {
-      guardarEntradasEnStorage();
-      showToast("✅ Guardado manualmente");
-      return;
-    }
-    if (t.includes("exportar") || t.includes("pdf")) {
-      exportarAPDF();
-      return;
-    }
-    if (t.includes("leer")) {
-      leerEnVozAlta();
-      return;
+    // Guardar el texto confirmado en la entrada actual
+    if (textoConfirmado.trim()) {
+      const entrada = entradas.find(e => e.id === entradaActualId);
+      if (entrada) {
+        if (entrada.contenido === "" || entrada.contenido.includes("Presioná el micrófono")) {
+          entrada.contenido = textoConfirmado;
+        } else {
+          entrada.contenido += "\n\n" + textoConfirmado;
+        }
+        entrada.fechaModificacion = new Date().toISOString();
+        guardarEntradasEnStorage();
+        sonidoConfirmacion();
+        showToast("✅ Dictado guardado");
+      }
     }
     
-    // Si no es comando, es texto para agregar
-    agregarTextoAEntradaActual(texto);
+    textoConfirmado = "";
+    actualizarVistaEntrada();
   }
 
   // ==========================================
@@ -683,95 +874,7 @@
     
     const nombreArchivo = `${entrada.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     doc.save(nombreArchivo);
-    showToast("📄 PDF generado y descargado");
-  }
-
-  // ==========================================
-  // DICTADO POR VOZ
-  // ==========================================
-  function activarMicrofono() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      showToast("Dictado no disponible en este navegador");
-      return;
-    }
-
-    if (isRecording) {
-      detenerMicrofono(true);
-      return;
-    }
-
-    isRecording = true;
-    startTime = Date.now();
-    btnMic.classList.add('recording');
-    btnCancelarGrabacion.classList.add('show');
-    dialogMeta.textContent = '🎙️ Habla con calma, estoy escuchando...';
-    
-    if (dialogText.textContent.includes("Presioná el micrófono")) {
-      dialogText.textContent = '';
-    }
-    
-    showToast('🎤 Escuchando...');
-    iniciarReconocimiento();
-  }
-
-  function iniciarReconocimiento() {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognitionInstance = new SR();
-    recognitionInstance.lang = 'es-ES';
-    recognitionInstance.interimResults = false;
-    recognitionInstance.continuous = false;
-    
-    recognitionInstance.onstart = () => { btnMic.classList.add('recording'); };
-
-    recognitionInstance.onresult = (event) => {
-      const textoNuevo = event.results[0][0].transcript.trim();
-      if (textoNuevo) {
-        procesarComandoDeVoz(textoNuevo);
-      }
-      detenerMicrofono();
-    };
-
-    recognitionInstance.onerror = (event) => {
-      console.error('Error de reconocimiento:', event.error);
-      if (event.error !== 'no-speech') {
-        showToast('No escuché nada, intentá de nuevo');
-      }
-      detenerMicrofono();
-    };
-
-    recognitionInstance.onend = () => {
-      const tiempoTranscurrido = Date.now() - startTime;
-      if (tiempoTranscurrido < TIEMPO_MINIMO_ESCUCHA && isRecording) {
-        dialogMeta.textContent = '⏳ Habla con calma, estoy escuchando...';
-        setTimeout(() => {
-          if (isRecording) {
-            try { recognitionInstance.start(); } catch(e) {}
-          }
-        }, 100);
-      } else {
-        detenerMicrofono();
-      }
-    };
-
-    try {
-      recognitionInstance.start();
-    } catch(e) {
-      console.error('Error al iniciar:', e);
-      detenerMicrofono();
-    }
-  }
-
-  function detenerMicrofono(cancelar = false) {
-    isRecording = false;
-    btnMic.classList.remove('recording');
-    btnCancelarGrabacion.classList.remove('show');
-    if (recognitionInstance) {
-      try { recognitionInstance.stop(); } catch(e) {}
-    }
-    if (!entradaActualId || (entradas.find(e => e.id === entradaActualId)?.contenido === "")) {
-      actualizarVistaEntrada();
-    }
+    showToast(" PDF generado y descargado");
   }
 
   // ==========================================
@@ -836,11 +939,11 @@
       btnLeer.style.background = '#8e44ad';
     };
     utterance.onend = () => {
-      btnLeer.textContent = '🔊 Leer';
+      btnLeer.textContent = ' Leer';
       btnLeer.style.background = '';
     };
     utterance.onerror = () => {
-      btnLeer.textContent = ' Leer';
+      btnLeer.textContent = '🔊 Leer';
       btnLeer.style.background = '';
       showToast('⚠️ Error al leer');
     };
@@ -853,7 +956,6 @@
   // GESTIÓN DE CATEGORÍAS
   // ==========================================
   function renderModalCategoria() {
-    // Parte 1: Elegir categoría (solo visibles)
     const visibles = getCategoriasVisibles();
     listaCategoriasElegir.innerHTML = visibles.map(cat => 
       `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')">
@@ -861,14 +963,13 @@
       </button>`
     ).join('') || '<p style="color:#95a5a6; text-align:center; padding:12px;">No hay categorías visibles</p>';
 
-    // Parte 2: Gestionar categorías (todas, incluyendo ocultas)
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
       `<div class="cat-item ${cat.visible ? '' : 'oculta'}">
-        <span class="cat-item-nombre">${cat.visible ? '️' : '🚫'} ${cat.nombre}</span>
+        <span class="cat-item-nombre">${cat.visible ? '🔵' : '🚫'} ${cat.nombre}</span>
         <div class="cat-item-acciones">
-          <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
-          <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '' : '👁️'}</button>
-          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">️</button>` : ''}
+          <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">️</button>
+          <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
+          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">🗑️</button>` : ''}
         </div>
       </div>`
     ).join('');
@@ -895,14 +996,11 @@
     const nuevoNombre = prompt(`Renombrar "${catActual.nombre}":`, catActual.nombre);
     if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== catActual.nombre) {
       const nombreLimpio = nuevoNombre.trim();
-      // Verificar que no exista ya
       if (categorias.some(c => c.nombre.toLowerCase() === nombreLimpio.toLowerCase())) {
         showToast("⚠️ Ya existe una categoría con ese nombre");
         return;
       }
-      // Actualizar nombre en la categoría
       categorias[idx].nombre = nombreLimpio;
-      // Actualizar todas las entradas que usaban el nombre viejo
       entradas.forEach(e => {
         if (e.categoria === catActual.nombre) {
           e.categoria = nombreLimpio;
@@ -921,13 +1019,12 @@
     categorias[idx].visible = !categorias[idx].visible;
     guardarCategorias();
     renderModalCategoria();
-    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : ` Oculta: ${categorias[idx].nombre}`);
+    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
   };
 
   window.eliminarCategoria = (idx) => {
     const cat = categorias[idx];
-    if (confirm(`¿Eliminar la categoría "${cat.nombre}"? Las entradas no se borran, pasarán a "Sin categoría".`)) {
-      // Mover entradas de esta categoría a "Sin categoría"
+    if (confirm(`¿Eliminar la categoría "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
       entradas.forEach(e => {
         if (e.categoria === cat.nombre) {
           e.categoria = "Sin categoría";
@@ -964,13 +1061,27 @@
   // EVENT LISTENERS
   // ==========================================
   btnMic.addEventListener('click', activarMicrofono);
-  btnCancelarGrabacion.addEventListener('click', () => detenerMicrofono(true));
+  
+  btnCancelarGrabacion.addEventListener('click', () => {
+    if (isRecording) {
+      textoConfirmado = "";
+      textoProvisional = "";
+      detenerDictadoPro();
+      showToast("❌ Dictado cancelado");
+    }
+  });
   
   btnNuevoFlotante.addEventListener('click', () => {
+    if (isRecording) {
+      detenerDictadoPro();
+    }
     crearNuevaEntrada("Nueva entrada", "Sin categoría");
   });
   
   btnBorrar.addEventListener('click', () => {
+    if (isRecording) {
+      detenerDictadoPro();
+    }
     if (entradaActualId) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
@@ -981,9 +1092,9 @@
         showToast("🗑️ Texto borrado");
       }
     } else {
-      dialogText.textContent = "Presioná el micrófono y decí 'Crear mensaje' o empezá a dictar...";
+      dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
       dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
-      showToast("🗑️ Texto borrado");
+      showToast("️ Texto borrado");
     }
   });
 
@@ -996,11 +1107,20 @@
   modalCategoria.addEventListener('click', (e) => { if (e.target === modalCategoria) modalCategoria.classList.remove('show'); });
 
   btnCorregir.addEventListener('click', () => {
+    // Si está dictando, detener primero
+    if (isRecording) {
+      detenerDictadoPro();
+    }
     isEditing = !isEditing;
     dialogText.contentEditable = isEditing;
     editBadge.classList.toggle('show', isEditing);
     btnListoEdicion.classList.toggle('show', isEditing);
     if (isEditing) {
+      // Cargar el texto actual en el editor
+      const entrada = entradas.find(e => e.id === entradaActualId);
+      if (entrada) {
+        dialogText.textContent = entrada.contenido || "";
+      }
       dialogText.focus();
       showToast('✏️ Modo edición activado');
     } else {
@@ -1011,13 +1131,20 @@
         guardarEntradasEnStorage();
       }
       showToast('✅ Cambios guardados');
+      actualizarVistaEntrada();
     }
   });
 
   btnListoEdicion.addEventListener('click', () => btnCorregir.click());
 
-  btnPDF.addEventListener('click', exportarAPDF);
-  btnLeer.addEventListener('click', leerEnVozAlta);
+  btnPDF.addEventListener('click', () => {
+    if (isRecording) detenerDictadoPro();
+    exportarAPDF();
+  });
+  btnLeer.addEventListener('click', () => {
+    if (isRecording) detenerDictadoPro();
+    leerEnVozAlta();
+  });
 
   btnAjustes.addEventListener('click', () => {
     document.getElementById('ajusteTamano').value = ajustes.tamano;
