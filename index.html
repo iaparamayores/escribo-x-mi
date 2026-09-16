@@ -58,11 +58,16 @@
   }
   body.modo-oscuro .dialog-text[contenteditable="true"] { background: #1a1a1a; color: #e5e5e5; }
   
+  /* MEJORA: Letra más grande y legible para la info de abajo */
   .dialog-meta {
-    font-size: 0.8rem; color: #7f8c8d; margin-top: 12px;
-    text-align: right; font-weight: 500; flex-shrink: 0;
+    font-size: 1.05rem; 
+    color: #555; 
+    margin-top: 12px;
+    text-align: right; 
+    font-weight: 600; 
+    flex-shrink: 0;
   }
-  body.modo-oscuro .dialog-meta { color: #a0a0a0; }
+  body.modo-oscuro .dialog-meta { color: #bbb; }
   
   .edit-badge {
     position: absolute; top: 12px; right: 12px; background: #3498db; color: white;
@@ -86,24 +91,11 @@
   }
   .btn-nuevo-flotante:active { transform: scale(0.95); }
 
-  /* BOTÓN DE PAUSA DENTRO DEL CUADRO */
   .btn-pausar {
-    position: absolute;
-    bottom: 12px;
-    left: 12px;
-    background: #f39c12;
-    color: white;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    display: none;
-    align-items: center;
-    gap: 6px;
-    font-weight: 600;
-    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
-    z-index: 5;
+    position: absolute; bottom: 12px; left: 12px; background: #f39c12; color: white;
+    border: none; padding: 8px 16px; border-radius: 20px; font-size: 0.85rem;
+    cursor: pointer; display: none; align-items: center; gap: 6px;
+    font-weight: 600; box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3); z-index: 5;
   }
   .btn-pausar.show { display: flex; }
   .btn-pausar:active { transform: scale(0.95); }
@@ -163,16 +155,13 @@
   .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.5); display: none; align-items: center;
-    justify-content: center; z-index: 100; padding: 16px; /* Reducido de 20px a 16px */
+    justify-content: center; z-index: 100; padding: 16px;
   }
   .modal-overlay.show { display: flex; }
   
-  /* MODAL AJUSTADO PARA NO SALIRSE DE LA PANTALLA */
   .modal {
     background: white; border-radius: 16px; padding: 20px;
-    width: 92%; /* Ancho relativo seguro */
-    max-width: 480px; /* Límite para tablets/PC */
-    max-height: 85vh; overflow-y: auto;
+    width: 92%; max-width: 480px; max-height: 85vh; overflow-y: auto;
   }
   body.modo-oscuro .modal { background: #2d2d2d; color: #e5e5e5; }
   .modal h3 { margin-bottom: 16px; color: #2c3e50; font-size: 1.2rem; }
@@ -188,18 +177,29 @@
   .historial-item {
     padding: 16px; background: #f8f9fa; border-radius: 12px;
     margin-bottom: 12px; cursor: pointer; border-left: 4px solid #3498db;
+    position: relative; /* Necesario para el botón de borrar */
   }
   body.modo-oscuro .historial-item { background: #1a1a1a; color: #e5e5e5; }
   .historial-item:active { transform: scale(0.98); background: #e9ecef; }
-  .historial-title { font-size: 1rem; font-weight: 600; color: #2c3e50; margin-bottom: 4px; }
+  .historial-title { font-size: 1rem; font-weight: 600; color: #2c3e50; margin-bottom: 4px; padding-right: 30px; }
   body.modo-oscuro .historial-title { color: #e5e5e5; }
-  .historial-meta { font-size: 0.8rem; color: #7f8c8d; margin-bottom: 6px; }
+  .historial-meta { font-size: 0.85rem; color: #7f8c8d; margin-bottom: 6px; }
   .historial-text { font-size: 0.9rem; color: #555; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   body.modo-oscuro .historial-text { color: #aaa; }
+  
+  .btn-delete-historial {
+    position: absolute; top: 12px; right: 12px;
+    background: #fee2e2; color: #dc2626; border: none;
+    width: 32px; height: 32px; border-radius: 50%;
+    font-size: 1rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .btn-delete-historial:active { background: #fecaca; }
 
-  .filtro-container { display: flex; gap: 8px; margin-bottom: 16px; }
+  /* MEJORA: Filtro apilado verticalmente para que no se desborde */
+  .filtro-container { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
   .filtro-container input, .filtro-container select {
-    flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.9rem;
+    width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 1rem;
   }
   body.modo-oscuro .filtro-container input, body.modo-oscuro .filtro-container select {
     background: #1a1a1a; color: #e5e5e5; border-color: #444;
@@ -266,7 +266,16 @@
   }
 
   .texto-provisional { color: #95a5a6; font-style: italic; }
-  .estado-dictado { font-weight: bold; color: #e74c3c; }
+  
+  /* MEJORA: Texto de estado centrado y más legible */
+  .estado-dictado { 
+    font-weight: bold; 
+    color: #e74c3c; 
+    text-align: center; 
+    display: block; 
+    font-size: 1.05rem;
+    margin-top: 4px;
+  }
 </style>
 </head>
 <body>
@@ -437,9 +446,7 @@
     guardarCategorias();
   }
 
-  function guardarCategorias() {
-    localStorage.setItem('escribo_x_mi_categorias', JSON.stringify(categorias));
-  }
+  function guardarCategorias() { localStorage.setItem('escribo_x_mi_categorias', JSON.stringify(categorias)); }
   function getCategoriasVisibles() { return categorias.filter(c => c.visible); }
   function obtenerNombresCategorias() { return categorias.map(c => c.nombre); }
 
@@ -451,7 +458,7 @@
   
   let isRecording = false;
   let dictando = false;
-  let pausado = false; // NUEVO: Estado de pausa
+  let pausado = false;
   let reinicioPendiente = false;
   let textoConfirmado = "";
   let textoProvisional = "";
@@ -485,7 +492,7 @@
   const btnHistorial = document.getElementById('btnHistorial');
   const btnAjustes = document.getElementById('btnAjustes');
   const btnNuevoFlotante = document.getElementById('btnNuevoFlotante');
-  const btnPausar = document.getElementById('btnPausar'); // NUEVO
+  const btnPausar = document.getElementById('btnPausar');
   const btnSalir = document.getElementById('btnSalir');
   const btnCancelarGrabacion = document.getElementById('btnCancelarGrabacion');
   const btnListoEdicion = document.getElementById('btnListoEdicion');
@@ -505,9 +512,7 @@
   // VOCES
   // ==========================================
   function cargarVoces() {
-    if ('speechSynthesis' in window) {
-      vocesDisponibles = window.speechSynthesis.getVoices();
-    }
+    if ('speechSynthesis' in window) { vocesDisponibles = window.speechSynthesis.getVoices(); }
   }
   if ('speechSynthesis' in window) {
     cargarVoces();
@@ -531,20 +536,11 @@
   // ==========================================
   // FUNCIONES DE ENTRADAS
   // ==========================================
-  function guardarEntradasEnStorage() {
-    localStorage.setItem('escribo_x_mi_entradas', JSON.stringify(entradas));
-  }
+  function guardarEntradasEnStorage() { localStorage.setItem('escribo_x_mi_entradas', JSON.stringify(entradas)); }
 
   function crearNuevaEntrada(titulo = "Nueva entrada", categoria = "Sin categoría") {
     entradaActualId = Date.now();
-    const nueva = {
-      id: entradaActualId,
-      titulo: titulo,
-      categoria: categoria,
-      contenido: "",
-      fechaCreacion: new Date().toISOString(),
-      fechaModificacion: new Date().toISOString()
-    };
+    const nueva = { id: entradaActualId, titulo: titulo, categoria: categoria, contenido: "", fechaCreacion: new Date().toISOString(), fechaModificacion: new Date().toISOString() };
     entradas.unshift(nueva);
     guardarEntradasEnStorage();
     actualizarVistaEntrada();
@@ -564,9 +560,7 @@
       dialogText.textContent = entrada.contenido || "";
       const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
       dialogMeta.textContent = `📂 Categoría: ${entrada.categoria} | 📝 Modificado: ${fecha}`;
-      if (dialogText.textContent === "") {
-        dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
-      }
+      if (dialogText.textContent === "") { dialogText.textContent = "Presioná el micrófono y empezá a dictar..."; }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
       dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
@@ -600,7 +594,7 @@
   }
 
   // ==========================================
-  // MOTOR DE DICTADO PRO (CON PAUSA)
+  // MOTOR DE DICTADO PRO
   // ==========================================
   function unirTexto(base, nuevo) {
     if (!base) return nuevo;
@@ -637,46 +631,27 @@
       case 'leer': leerEnVozAlta(); break;
       case 'guardar':
         const entradaGuard = entradas.find(e => e.id === entradaActualId);
-        if (entradaGuard) {
-          entradaGuard.contenido = textoConfirmado;
-          entradaGuard.fechaModificacion = new Date().toISOString();
-          guardarEntradasEnStorage();
-        }
+        if (entradaGuard) { entradaGuard.contenido = textoConfirmado; entradaGuard.fechaModificacion = new Date().toISOString(); guardarEntradasEnStorage(); }
         showToast("✅ Guardado manualmente");
         break;
       case 'pdf':
         const entradaPdf = entradas.find(e => e.id === entradaActualId);
-        if (entradaPdf) {
-          entradaPdf.contenido = textoConfirmado;
-          entradaPdf.fechaModificacion = new Date().toISOString();
-          guardarEntradasEnStorage();
-        }
+        if (entradaPdf) { entradaPdf.contenido = textoConfirmado; entradaPdf.fechaModificacion = new Date().toISOString(); guardarEntradasEnStorage(); }
         exportarAPDF();
         break;
       case 'nueva_categoria': btnCategoria.click(); break;
     }
-    if (comando.tipo === 'buscar') {
-      buscarYAbrirEntrada(comando.termino);
-      textoConfirmado = "";
-    }
+    if (comando.tipo === 'buscar') { buscarYAbrirEntrada(comando.termino); textoConfirmado = ""; }
   }
 
   function activarMicrofono() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) { showToast("Dictado no disponible en este navegador"); return; }
-
-    if (isRecording) {
-      detenerDictadoPro();
-      return;
-    }
-
+    if (isRecording) { detenerDictadoPro(); return; }
     if (isEditing) btnCorregir.click();
 
-    isRecording = true;
-    dictando = true;
-    pausado = false;
-    textoConfirmado = "";
-    textoProvisional = "";
+    isRecording = true; dictando = true; pausado = false;
+    textoConfirmado = ""; textoProvisional = "";
     
     btnMic.classList.add('recording');
     btnCancelarGrabacion.classList.add('show');
@@ -684,7 +659,7 @@
     btnPausar.textContent = '⏸️ Pausar';
     btnPausar.style.background = '#f39c12';
     
-    dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado continuo activo. Tocá de nuevo para finalizar.</span>';
+    dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado activo. Tocá el mic para finalizar.</span>';
     
     if (!entradaActualId) crearNuevaEntrada("Nota de voz", "Sin categoría");
     iniciarReconocimientoPro();
@@ -714,11 +689,8 @@
 
         if (resultado.isFinal) {
           const comando = esComandoExacto(texto.toLowerCase());
-          if (comando) {
-            ejecutarComando(comando);
-          } else {
-            textoConfirmado = unirTexto(textoConfirmado, texto);
-          }
+          if (comando) { ejecutarComando(comando); } 
+          else { textoConfirmado = unirTexto(textoConfirmado, texto); }
           textoProvisional = "";
         } else {
           textoProvisional = unirTexto(textoProvisional, texto);
@@ -730,7 +702,7 @@
     recognitionInstance.onerror = (event) => {
       if (event.error === 'no-speech') return;
       if (event.error === 'not-allowed') { showToast('⚠️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
-      if (event.error === 'network') { showToast('⚠️ El dictado requiere conexión a internet'); detenerDictadoPro(); }
+      if (event.error === 'network') { showToast('⚠️ El dictado requiere conexión'); detenerDictadoPro(); }
     };
 
     recognitionInstance.onend = () => {
@@ -752,16 +724,10 @@
   }
 
   function detenerDictadoPro() {
-    isRecording = false;
-    dictando = false;
-    pausado = false;
-    reinicioPendiente = false;
-    textoProvisional = "";
-    
+    isRecording = false; dictando = false; pausado = false; reinicioPendiente = false; textoProvisional = "";
     btnMic.classList.remove('recording');
     btnCancelarGrabacion.classList.remove('show');
     btnPausar.classList.remove('show');
-    
     if (recognitionInstance) { try { recognitionInstance.stop(); } catch(e) {} }
     
     if (textoConfirmado.trim()) {
@@ -788,24 +754,20 @@
   function exportarAPDF() {
     const entrada = entradas.find(e => e.id === entradaActualId);
     if (!entrada || !entrada.contenido.trim() || entrada.contenido.includes("Presioná el micrófono")) {
-      showToast("⚠️ No hay texto para exportar");
-      return;
+      showToast("⚠️ No hay texto para exportar"); return;
     }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     doc.setFont("helvetica", "normal");
     doc.setFontSize(18);
     doc.text(entrada.titulo, 20, 20);
-    doc.setFontSize(10);
-    doc.setTextColor(100);
+    doc.setFontSize(10); doc.setTextColor(100);
     const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
     doc.text(`Categoría: ${entrada.categoria} | Fecha: ${fecha}`, 20, 30);
-    doc.setFontSize(12);
-    doc.setTextColor(0);
+    doc.setFontSize(12); doc.setTextColor(0);
     const lineas = doc.splitTextToSize(entrada.contenido, 170);
     doc.text(lineas, 20, 45);
-    doc.setFontSize(8);
-    doc.setTextColor(150);
+    doc.setFontSize(8); doc.setTextColor(150);
     doc.text("Generado con Escribo x mi", 20, 280);
     const nombreArchivo = `${entrada.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     doc.save(nombreArchivo);
@@ -819,8 +781,7 @@
     setTimeout(() => { dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight; }, 50);
   }
   function showToast(msg) {
-    toast.textContent = msg;
-    toast.classList.add('show');
+    toast.textContent = msg; toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
   function sonidoConfirmacion() {
@@ -829,29 +790,34 @@
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const t = audioCtx.currentTime;
-      const o1 = audioCtx.createOscillator();
-      const g1 = audioCtx.createGain();
+      const o1 = audioCtx.createOscillator(); const g1 = audioCtx.createGain();
       o1.connect(g1); g1.connect(audioCtx.destination);
       o1.type = 'sine'; o1.frequency.value = 880;
-      g1.gain.setValueAtTime(0.3, t);
-      g1.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
+      g1.gain.setValueAtTime(0.3, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 0.15);
       o1.start(t); o1.stop(t + 0.15);
     } catch(e) {}
   }
+  
   function leerEnVozAlta() {
     const entrada = entradas.find(e => e.id === entradaActualId);
-    const texto = entrada ? entrada.contenido : dialogText.textContent;
+    let texto = entrada ? entrada.contenido : dialogText.textContent;
     if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para leer'); return; }
     if (!('speechSynthesis' in window)) { showToast('⚠️ Tu navegador no soporta lectura en voz alta'); return; }
+    
+    // MEJORA: Asegurar espacios después de puntuación para que la voz haga pausas
+    texto = texto.replace(/([.,;:!?])/g, '$1 ').replace(/\s+/g, ' ').trim();
+    
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.rate = parseFloat(ajustes.velocidadLectura) || 0.75;
     utterance.pitch = 1; utterance.volume = 1;
     const voz = buscarMejorVoz();
     if (voz) { utterance.voice = voz; utterance.lang = voz.lang; } else { utterance.lang = 'es-AR'; }
+    
     utterance.onstart = () => { btnLeer.textContent = '🔊 Leyendo...'; btnLeer.style.background = '#8e44ad'; };
     utterance.onend = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; };
     utterance.onerror = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; showToast('⚠️ Error al leer'); };
+    
     window.speechSynthesis.speak(utterance);
     showToast('🔊 Leyendo en voz alta...');
   }
@@ -882,10 +848,8 @@
     else {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
-        entrada.categoria = catNombre;
-        entrada.fechaModificacion = new Date().toISOString();
-        guardarEntradasEnStorage();
-        actualizarVistaEntrada();
+        entrada.categoria = catNombre; entrada.fechaModificacion = new Date().toISOString();
+        guardarEntradasEnStorage(); actualizarVistaEntrada();
         showToast(`📂 Categoría: ${catNombre}`);
       }
     }
@@ -897,9 +861,7 @@
     const nuevoNombre = prompt(`Renombrar "${catActual.nombre}":`, catActual.nombre);
     if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== catActual.nombre) {
       const nombreLimpio = nuevoNombre.trim();
-      if (categorias.some(c => c.nombre.toLowerCase() === nombreLimpio.toLowerCase())) {
-        showToast("⚠️ Ya existe una categoría con ese nombre"); return;
-      }
+      if (categorias.some(c => c.nombre.toLowerCase() === nombreLimpio.toLowerCase())) { showToast("⚠️ Ya existe con ese nombre"); return; }
       categorias[idx].nombre = nombreLimpio;
       entradas.forEach(e => { if (e.categoria === catActual.nombre) { e.categoria = nombreLimpio; e.fechaModificacion = new Date().toISOString(); } });
       guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
@@ -915,7 +877,7 @@
 
   window.eliminarCategoria = (idx) => {
     const cat = categorias[idx];
-    if (confirm(`¿Eliminar la categoría "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
+    if (confirm(`¿Eliminar "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
       entradas.forEach(e => { if (e.categoria === cat.nombre) { e.categoria = "Sin categoría"; e.fechaModificacion = new Date().toISOString(); } });
       categorias.splice(idx, 1); guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
       showToast(`🗑️ Eliminada: ${cat.nombre}`);
@@ -925,7 +887,7 @@
   btnAgregarCat.addEventListener('click', () => {
     const nombre = nuevaCatInput.value.trim();
     if (!nombre) { showToast("⚠️ Escribí un nombre"); return; }
-    if (categorias.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) { showToast("⚠️ Ya existe una categoría con ese nombre"); return; }
+    if (categorias.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) { showToast("⚠️ Ya existe con ese nombre"); return; }
     categorias.push({ nombre: nombre, visible: true });
     guardarCategorias(); nuevaCatInput.value = ''; renderModalCategoria();
     showToast(`✅ Agregada: ${nombre}`);
@@ -939,14 +901,12 @@
   btnPausar.addEventListener('click', () => {
     if (!isRecording) return;
     if (!pausado) {
-      // PAUSAR
       pausado = true;
       if (recognitionInstance) { try { recognitionInstance.stop(); } catch(e) {} }
       btnPausar.textContent = '▶️ Reanudar';
       btnPausar.style.background = '#27ae60';
       dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
     } else {
-      // REANUDAR
       pausado = false;
       btnPausar.textContent = '⏸️ Pausar';
       btnPausar.style.background = '#f39c12';
@@ -956,11 +916,7 @@
   });
 
   btnCancelarGrabacion.addEventListener('click', () => {
-    if (isRecording) {
-      textoConfirmado = ""; textoProvisional = "";
-      detenerDictadoPro();
-      showToast("❌ Dictado cancelado");
-    }
+    if (isRecording) { textoConfirmado = ""; textoProvisional = ""; detenerDictadoPro(); showToast("❌ Dictado cancelado"); }
   });
   
   btnNuevoFlotante.addEventListener('click', () => {
@@ -973,10 +929,8 @@
     if (entradaActualId) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
-        entrada.contenido = "";
-        entrada.fechaModificacion = new Date().toISOString();
-        guardarEntradasEnStorage();
-        actualizarVistaEntrada();
+        entrada.contenido = ""; entrada.fechaModificacion = new Date().toISOString();
+        guardarEntradasEnStorage(); actualizarVistaEntrada();
         showToast("🗑️ Texto borrado");
       }
     } else {
@@ -1003,11 +957,7 @@
       showToast('✏️ Modo edición activado');
     } else {
       const entrada = entradas.find(e => e.id === entradaActualId);
-      if (entrada) {
-        entrada.contenido = dialogText.textContent;
-        entrada.fechaModificacion = new Date().toISOString();
-        guardarEntradasEnStorage();
-      }
+      if (entrada) { entrada.contenido = dialogText.textContent; entrada.fechaModificacion = new Date().toISOString(); guardarEntradasEnStorage(); }
       showToast('✅ Cambios guardados');
       actualizarVistaEntrada();
     }
@@ -1027,8 +977,7 @@
     ajusteVoz.innerHTML = '<option value="auto">Automática (recomendado)</option>';
     vocesDisponibles.filter(v => v.lang.startsWith('es')).forEach(v => {
       const option = document.createElement('option');
-      option.value = v.name;
-      option.textContent = `${v.name} (${v.lang})`;
+      option.value = v.name; option.textContent = `${v.name} (${v.lang})`;
       if (v.name === ajustes.vozPreferida) option.selected = true;
       ajusteVoz.appendChild(option);
     });
@@ -1066,6 +1015,7 @@
       const coincideCat = catFiltro === "Todas" || e.categoria === catFiltro;
       return coincideBusqueda && coincideCat;
     });
+    
     if (filtradas.length === 0) {
       historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">No se encontraron escritos</p>';
     } else {
@@ -1073,6 +1023,7 @@
         const fecha = new Date(e.fechaModificacion).toLocaleDateString('es-AR');
         const preview = e.contenido.substring(0, 60) + (e.contenido.length > 60 ? '...' : '');
         return `<div class="historial-item" onclick="cargarEntrada(${e.id})">
+          <button class="btn-delete-historial" onclick="borrarEntradaHistorial(${e.id}, event)" title="Borrar">🗑️</button>
           <div class="historial-title">${e.titulo}</div>
           <div class="historial-meta">📂 ${e.categoria} | 📅 ${fecha}</div>
           <div class="historial-text">${preview || '(Vacío)'}</div>
@@ -1080,6 +1031,24 @@
       }).join('');
     }
   }
+
+  // NUEVA FUNCIÓN: Borrar entrada desde el historial
+  window.borrarEntradaHistorial = (id, event) => {
+    event.stopPropagation(); // Evita que se abra la entrada al hacer clic en borrar
+    if (confirm("¿Estás seguro de que querés borrar esta entrada permanentemente?")) {
+      entradas = entradas.filter(e => e.id !== id);
+      guardarEntradasEnStorage();
+      
+      // Si la entrada borrada era la que estaba abierta, limpiamos la vista
+      if (entradaActualId === id) {
+        entradaActualId = null;
+        actualizarVistaEntrada();
+      }
+      
+      renderHistorial(); // Actualizar la lista
+      showToast("🗑️ Entrada eliminada");
+    }
+  };
 
   filtroBusqueda.addEventListener('input', renderHistorial);
   filtroCategoria.addEventListener('change', renderHistorial);
