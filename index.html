@@ -86,6 +86,28 @@
   }
   .btn-nuevo-flotante:active { transform: scale(0.95); }
 
+  /* BOTÓN DE PAUSA DENTRO DEL CUADRO */
+  .btn-pausar {
+    position: absolute;
+    bottom: 12px;
+    left: 12px;
+    background: #f39c12;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.3);
+    z-index: 5;
+  }
+  .btn-pausar.show { display: flex; }
+  .btn-pausar:active { transform: scale(0.95); }
+
   .controls { display: flex; flex-direction: column; gap: 8px; }
   .controls-row { display: flex; justify-content: center; gap: 8px; }
   .btn-wrapper { flex: 1; display: flex; justify-content: center; }
@@ -141,12 +163,16 @@
   .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.5); display: none; align-items: center;
-    justify-content: center; z-index: 100; padding: 20px;
+    justify-content: center; z-index: 100; padding: 16px; /* Reducido de 20px a 16px */
   }
   .modal-overlay.show { display: flex; }
+  
+  /* MODAL AJUSTADO PARA NO SALIRSE DE LA PANTALLA */
   .modal {
-    background: white; border-radius: 16px; padding: 24px;
-    width: 100%; max-width: 500px; max-height: 85vh; overflow-y: auto;
+    background: white; border-radius: 16px; padding: 20px;
+    width: 92%; /* Ancho relativo seguro */
+    max-width: 480px; /* Límite para tablets/PC */
+    max-height: 85vh; overflow-y: auto;
   }
   body.modo-oscuro .modal { background: #2d2d2d; color: #e5e5e5; }
   .modal h3 { margin-bottom: 16px; color: #2c3e50; font-size: 1.2rem; }
@@ -215,49 +241,32 @@
   }
   body.modo-oscuro .ajuste-opcion select { background: #2d2d2d; color: #e5e5e5; border-color: #444; }
 
-  /* Estilos para gestión de categorías */
   .cat-item {
     display: flex; align-items: center; justify-content: space-between;
     padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
   }
   body.modo-oscuro .cat-item { background: #1a1a1a; }
   .cat-item.oculta { opacity: 0.5; }
-  .cat-item-nombre {
-    flex: 1; font-weight: 600; color: #2c3e50; font-size: 0.95rem;
-  }
+  .cat-item-nombre { flex: 1; font-weight: 600; color: #2c3e50; font-size: 0.95rem; }
   body.modo-oscuro .cat-item-nombre { color: #e5e5e5; }
   .cat-item-acciones { display: flex; gap: 6px; }
-  .cat-btn {
-    background: none; border: none; padding: 6px 10px; border-radius: 6px;
-    cursor: pointer; font-size: 0.85rem;
-  }
+  .cat-btn { background: none; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
   .cat-btn-renombrar { background: #3498db; color: white; }
   .cat-btn-ocultar { background: #95a5a6; color: white; }
   .cat-btn-eliminar { background: #e74c3c; color: white; }
   
-  .nueva-cat-form {
-    display: flex; gap: 8px; margin-top: 12px;
-  }
+  .nueva-cat-form { display: flex; gap: 8px; margin-top: 12px; }
   .nueva-cat-form input {
     flex: 1; padding: 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.95rem;
   }
-  body.modo-oscuro .nueva-cat-form input {
-    background: #1a1a1a; color: #e5e5e5; border-color: #444;
-  }
+  body.modo-oscuro .nueva-cat-form input { background: #1a1a1a; color: #e5e5e5; border-color: #444; }
   .nueva-cat-form button {
     padding: 10px 16px; background: #27ae60; color: white; border: none;
     border-radius: 8px; font-weight: 600; cursor: pointer;
   }
 
-  /* ESTILOS PARA DICTADO PRO */
-  .texto-provisional {
-    color: #95a5a6;
-    font-style: italic;
-  }
-  .estado-dictado {
-    font-weight: bold;
-    color: #e74c3c;
-  }
+  .texto-provisional { color: #95a5a6; font-style: italic; }
+  .estado-dictado { font-weight: bold; color: #e74c3c; }
 </style>
 </head>
 <body>
@@ -268,18 +277,19 @@
     <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion">✖ Cancelar</button>
     <button class="btn-listo-edicion" id="btnListoEdicion">✓ Listo</button>
     <button class="btn-nuevo-flotante" id="btnNuevoFlotante">➕ Nuevo</button>
+    <button class="btn-pausar" id="btnPausar">⏸️ Pausar</button>
     <div class="edit-badge" id="editBadge">✏️ Editando</div>
     
     <div class="dialog-text-container" id="dialogTextContainer">
       <p class="dialog-text texto-normal" id="dialogText">Presioná el micrófono y empezá a dictar...</p>
     </div>
-    <p class="dialog-meta" id="dialogMeta"> Categoría: Sin categoría | 📝 Nuevo</p>
+    <p class="dialog-meta" id="dialogMeta">📂 Categoría: Sin categoría | 📝 Nuevo</p>
   </div>
 
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHistorial"> Historial</button>
+        <button class="btn-side" id="btnHistorial">📋 Historial</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
@@ -296,7 +306,7 @@
         <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnPDF"> PDF</button>
+        <button class="btn-side" id="btnPDF">📄 PDF</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnLeer">🔊 Leer</button>
@@ -326,7 +336,7 @@
 <!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
-    <h3> Mis Escritos</h3>
+    <h3>📋 Mis Escritos</h3>
     <div class="filtro-container">
       <input type="text" id="filtroBusqueda" placeholder="🔍 Buscar por título...">
       <select id="filtroCategoria">
@@ -343,15 +353,12 @@
   <div class="modal">
     <h3>📂 Elegir Categoría</h3>
     <div id="listaCategoriasElegir" style="display: flex; flex-direction: column; gap: 8px;"></div>
-    
     <h4>⚙️ Gestionar categorías</h4>
     <div id="listaCategoriasGestionar" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
-    
     <div class="nueva-cat-form">
       <input type="text" id="nuevaCatInput" placeholder="Nombre de nueva categoría...">
       <button id="btnAgregarCat">Agregar</button>
     </div>
-    
     <button class="modal-close" id="categoriaClose">Cerrar</button>
   </div>
 </div>
@@ -360,7 +367,6 @@
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
     <h3>⚙️ Ajustes</h3>
-    
     <div class="ajuste-opcion">
       <label>🔤 Tamaño de texto</label>
       <select id="ajusteTamano">
@@ -369,15 +375,13 @@
         <option value="grande">Grande</option>
       </select>
     </div>
-    
     <div class="ajuste-opcion">
-      <label> Modo oscuro</label>
+      <label>🌙 Modo oscuro</label>
       <select id="ajusteModoOscuro">
         <option value="0" selected>Desactivado</option>
         <option value="1">Activado</option>
       </select>
     </div>
-    
     <div class="ajuste-opcion">
       <label>⏱️ Tiempo de escucha</label>
       <select id="ajusteTiempo">
@@ -386,7 +390,6 @@
         <option value="7000">Largo (7 seg)</option>
       </select>
     </div>
-    
     <div class="ajuste-opcion">
       <label>🔊 Sonido al guardar</label>
       <select id="ajusteSonido">
@@ -394,7 +397,6 @@
         <option value="0">Desactivado</option>
       </select>
     </div>
-    
     <div class="ajuste-opcion">
       <label>🐢 Velocidad de lectura</label>
       <select id="ajusteVelocidad">
@@ -404,14 +406,12 @@
         <option value="1">Normal</option>
       </select>
     </div>
-    
     <div class="ajuste-opcion">
       <label>🗣️ Voz para leer</label>
       <select id="ajusteVoz">
         <option value="auto">Automática (recomendado)</option>
       </select>
     </div>
-    
     <button class="modal-close" id="ajustesClose">Guardar y Cerrar</button>
   </div>
 </div>
@@ -440,14 +440,8 @@
   function guardarCategorias() {
     localStorage.setItem('escribo_x_mi_categorias', JSON.stringify(categorias));
   }
-
-  function getCategoriasVisibles() {
-    return categorias.filter(c => c.visible);
-  }
-
-  function obtenerNombresCategorias() {
-    return categorias.map(c => c.nombre);
-  }
+  function getCategoriasVisibles() { return categorias.filter(c => c.visible); }
+  function obtenerNombresCategorias() { return categorias.map(c => c.nombre); }
 
   // ==========================================
   // ESTADO (DICTADO PRO)
@@ -455,9 +449,9 @@
   let entradas = JSON.parse(localStorage.getItem('escribo_x_mi_entradas') || '[]');
   let entradaActualId = null;
   
-  // Estado del dictado Pro
   let isRecording = false;
   let dictando = false;
+  let pausado = false; // NUEVO: Estado de pausa
   let reinicioPendiente = false;
   let textoConfirmado = "";
   let textoProvisional = "";
@@ -491,6 +485,7 @@
   const btnHistorial = document.getElementById('btnHistorial');
   const btnAjustes = document.getElementById('btnAjustes');
   const btnNuevoFlotante = document.getElementById('btnNuevoFlotante');
+  const btnPausar = document.getElementById('btnPausar'); // NUEVO
   const btnSalir = document.getElementById('btnSalir');
   const btnCancelarGrabacion = document.getElementById('btnCancelarGrabacion');
   const btnListoEdicion = document.getElementById('btnListoEdicion');
@@ -583,7 +578,6 @@
     const t = termino.toLowerCase();
     const catEncontrada = categorias.find(c => t.includes(c.nombre.toLowerCase()));
     if (catEncontrada) return catEncontrada.nombre;
-    
     if (t.includes("receta")) return "Recetas y secretos";
     if (t.includes("recuerdo")) return "Recuerdos";
     if (t.includes("carta")) return "Cartas";
@@ -594,22 +588,19 @@
 
   function buscarYAbrirEntrada(termino) {
     const t = termino.toLowerCase().trim();
-    let encontrada = entradas.find(e => 
-      e.categoria.toLowerCase().includes(t) || e.titulo.toLowerCase().includes(t)
-    );
-    
+    let encontrada = entradas.find(e => e.categoria.toLowerCase().includes(t) || e.titulo.toLowerCase().includes(t));
     if (!encontrada) {
       const tituloFinal = termino.charAt(0).toUpperCase() + termino.slice(1);
       crearNuevaEntrada(tituloFinal, mapearCategoría(termino));
       showToast(`📝 Creado: ${tituloFinal}`);
     } else {
       cargarEntrada(encontrada.id);
-      showToast(` Abierto: ${encontrada.titulo}`);
+      showToast(`📂 Abierto: ${encontrada.titulo}`);
     }
   }
 
   // ==========================================
-  // MOTOR DE DICTADO PRO
+  // MOTOR DE DICTADO PRO (CON PAUSA)
   // ==========================================
   function unirTexto(base, nuevo) {
     if (!base) return nuevo;
@@ -628,40 +619,22 @@
   }
 
   function esComandoExacto(t) {
-    // Comandos de creación (exactos)
-    if (t === "crear mensaje" || t === "nueva entrada" || t === "crear nota" || t === "nuevo mensaje") {
-      return { tipo: 'crear', accion: 'crear' };
-    }
-    // Comandos de búsqueda (empiezan con buscar/abrir)
+    if (t === "crear mensaje" || t === "nueva entrada" || t === "crear nota" || t === "nuevo mensaje") return { tipo: 'crear', accion: 'crear' };
     if (t.startsWith("buscar ") || t.startsWith("abrir ")) {
       const termino = t.replace(/^(buscar |abrir )/, '').trim();
       if (termino) return { tipo: 'buscar', termino: termino };
     }
-    // Comandos de acción (exactos o con palabra clave)
-    if (t === "leer" || t === "leer en voz alta" || t.includes("leer todo")) {
-      return { tipo: 'accion', accion: 'leer' };
-    }
-    if (t === "guardar" || t === "guardar entrada") {
-      return { tipo: 'accion', accion: 'guardar' };
-    }
-    if (t === "pdf" || t === "exportar" || t === "exportar a pdf" || t === "generar pdf") {
-      return { tipo: 'accion', accion: 'pdf' };
-    }
-    if (t === "nueva categoría" || t === "crear categoría") {
-      return { tipo: 'accion', accion: 'nueva_categoria' };
-    }
+    if (t === "leer" || t === "leer en voz alta" || t.includes("leer todo")) return { tipo: 'accion', accion: 'leer' };
+    if (t === "guardar" || t === "guardar entrada") return { tipo: 'accion', accion: 'guardar' };
+    if (t === "pdf" || t === "exportar" || t === "exportar a pdf" || t === "generar pdf") return { tipo: 'accion', accion: 'pdf' };
+    if (t === "nueva categoría" || t === "crear categoría") return { tipo: 'accion', accion: 'nueva_categoria' };
     return null;
   }
 
   function ejecutarComando(comando) {
     switch (comando.accion) {
-      case 'crear':
-        crearNuevaEntrada("Nueva entrada", "Sin categoría");
-        textoConfirmado = "";
-        break;
-      case 'leer':
-        leerEnVozAlta();
-        break;
+      case 'crear': crearNuevaEntrada("Nueva entrada", "Sin categoría"); textoConfirmado = ""; break;
+      case 'leer': leerEnVozAlta(); break;
       case 'guardar':
         const entradaGuard = entradas.find(e => e.id === entradaActualId);
         if (entradaGuard) {
@@ -672,7 +645,6 @@
         showToast("✅ Guardado manualmente");
         break;
       case 'pdf':
-        // Guardar primero y luego exportar
         const entradaPdf = entradas.find(e => e.id === entradaActualId);
         if (entradaPdf) {
           entradaPdf.contenido = textoConfirmado;
@@ -681,9 +653,7 @@
         }
         exportarAPDF();
         break;
-      case 'nueva_categoria':
-        btnCategoria.click();
-        break;
+      case 'nueva_categoria': btnCategoria.click(); break;
     }
     if (comando.tipo === 'buscar') {
       buscarYAbrirEntrada(comando.termino);
@@ -693,43 +663,36 @@
 
   function activarMicrofono() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      showToast("Dictado no disponible en este navegador");
-      return;
-    }
+    if (!SR) { showToast("Dictado no disponible en este navegador"); return; }
 
-    // Si ya está dictando, el segundo toque lo detiene y guarda
     if (isRecording) {
       detenerDictadoPro();
       return;
     }
 
-    // Si está en modo edición, salir primero
-    if (isEditing) {
-      btnCorregir.click();
-    }
+    if (isEditing) btnCorregir.click();
 
-    // Iniciar modo dictado continuo
     isRecording = true;
     dictando = true;
+    pausado = false;
     textoConfirmado = "";
     textoProvisional = "";
+    
     btnMic.classList.add('recording');
     btnCancelarGrabacion.classList.add('show');
+    btnPausar.classList.add('show');
+    btnPausar.textContent = '⏸️ Pausar';
+    btnPausar.style.background = '#f39c12';
+    
     dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado continuo activo. Tocá de nuevo para finalizar.</span>';
     
-    if (!entradaActualId) {
-      crearNuevaEntrada("Nota de voz", "Sin categoría");
-    }
-
+    if (!entradaActualId) crearNuevaEntrada("Nota de voz", "Sin categoría");
     iniciarReconocimientoPro();
   }
 
   function iniciarReconocimientoPro() {
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     recognitionInstance = new SR();
-    
-    // CONFIGURACIÓN CLAVE DEL MÓDULO PRO
     recognitionInstance.lang = 'es-AR';
     recognitionInstance.continuous = false;
     recognitionInstance.interimResults = true;
@@ -737,28 +700,23 @@
     
     recognitionInstance.onstart = () => {
       btnMic.classList.add('recording');
-      if (dictando) {
+      if (dictando && !pausado) {
         dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>';
       }
     };
 
     recognitionInstance.onresult = (event) => {
       textoProvisional = "";
-
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const resultado = event.results[i];
         const texto = resultado[0].transcript.trim();
-
         if (!texto) continue;
 
         if (resultado.isFinal) {
-          // Verificar si es un comando
           const comando = esComandoExacto(texto.toLowerCase());
           if (comando) {
             ejecutarComando(comando);
-            textoProvisional = "";
           } else {
-            // Agregar al texto confirmado
             textoConfirmado = unirTexto(textoConfirmado, texto);
           }
           textoProvisional = "";
@@ -770,58 +728,42 @@
     };
 
     recognitionInstance.onerror = (event) => {
-      if (event.error === 'no-speech') {
-        return;
-      }
-      if (event.error === 'not-allowed') {
-        showToast('⚠️ Necesitás habilitar el micrófono');
-        detenerDictadoPro();
-        return;
-      }
-      if (event.error === 'network') {
-        showToast('⚠️ El dictado requiere conexión a internet');
-        detenerDictadoPro();
-      }
+      if (event.error === 'no-speech') return;
+      if (event.error === 'not-allowed') { showToast('⚠️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
+      if (event.error === 'network') { showToast('⚠️ El dictado requiere conexión a internet'); detenerDictadoPro(); }
     };
 
     recognitionInstance.onend = () => {
-      if (dictando) {
+      if (dictando && !pausado) {
         dialogMeta.innerHTML = '<span class="estado-dictado">⏳ Pausa detectada, continuando...</span>';
         setTimeout(() => {
-          if (dictando && !reinicioPendiente) {
-            try {
-              recognitionInstance.start();
-            } catch (e) {
-              console.warn('Reinicio automático falló');
-              dialogMeta.innerHTML = '<span class="estado-dictado">️ Tocá el mic para continuar</span>';
+          if (dictando && !pausado && !reinicioPendiente) {
+            try { recognitionInstance.start(); } catch (e) {
+              dialogMeta.innerHTML = '<span class="estado-dictado">⚠️ Tocá el mic para continuar</span>';
             }
           }
         }, 250);
+      } else if (pausado) {
+        dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
       }
     };
 
-    try {
-      recognitionInstance.start();
-    } catch(e) {
-      console.error('Error al iniciar:', e);
-      detenerDictadoPro();
-    }
+    try { recognitionInstance.start(); } catch(e) { console.error('Error al iniciar:', e); detenerDictadoPro(); }
   }
 
   function detenerDictadoPro() {
     isRecording = false;
     dictando = false;
+    pausado = false;
     reinicioPendiente = false;
     textoProvisional = "";
     
     btnMic.classList.remove('recording');
     btnCancelarGrabacion.classList.remove('show');
+    btnPausar.classList.remove('show');
     
-    if (recognitionInstance) {
-      try { recognitionInstance.stop(); } catch(e) {}
-    }
+    if (recognitionInstance) { try { recognitionInstance.stop(); } catch(e) {} }
     
-    // Guardar el texto confirmado en la entrada actual
     if (textoConfirmado.trim()) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
@@ -836,7 +778,6 @@
         showToast("✅ Dictado guardado");
       }
     }
-    
     textoConfirmado = "";
     actualizarVistaEntrada();
   }
@@ -850,48 +791,38 @@
       showToast("⚠️ No hay texto para exportar");
       return;
     }
-
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
-    
     doc.setFont("helvetica", "normal");
     doc.setFontSize(18);
     doc.text(entrada.titulo, 20, 20);
-    
     doc.setFontSize(10);
     doc.setTextColor(100);
     const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
     doc.text(`Categoría: ${entrada.categoria} | Fecha: ${fecha}`, 20, 30);
-    
     doc.setFontSize(12);
     doc.setTextColor(0);
     const lineas = doc.splitTextToSize(entrada.contenido, 170);
     doc.text(lineas, 20, 45);
-    
     doc.setFontSize(8);
     doc.setTextColor(150);
     doc.text("Generado con Escribo x mi", 20, 280);
-    
     const nombreArchivo = `${entrada.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     doc.save(nombreArchivo);
-    showToast(" PDF generado y descargado");
+    showToast("📄 PDF generado y descargado");
   }
 
   // ==========================================
   // UTILIDADES
   // ==========================================
   function scrollAlFinal() {
-    setTimeout(() => {
-      dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight;
-    }, 50);
+    setTimeout(() => { dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight; }, 50);
   }
-
   function showToast(msg) {
     toast.textContent = msg;
     toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
-
   function sonidoConfirmacion() {
     if (ajustes.sonido !== '1') return;
     try {
@@ -907,47 +838,20 @@
       o1.start(t); o1.stop(t + 0.15);
     } catch(e) {}
   }
-
   function leerEnVozAlta() {
     const entrada = entradas.find(e => e.id === entradaActualId);
     const texto = entrada ? entrada.contenido : dialogText.textContent;
-    if (!texto || texto.includes("Presioná el micrófono")) {
-      showToast('⚠️ No hay texto para leer');
-      return;
-    }
-    if (!('speechSynthesis' in window)) {
-      showToast('⚠️ Tu navegador no soporta lectura en voz alta');
-      return;
-    }
-    
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para leer'); return; }
+    if (!('speechSynthesis' in window)) { showToast('⚠️ Tu navegador no soporta lectura en voz alta'); return; }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(texto);
     utterance.rate = parseFloat(ajustes.velocidadLectura) || 0.75;
-    utterance.pitch = 1;
-    utterance.volume = 1;
-    
+    utterance.pitch = 1; utterance.volume = 1;
     const voz = buscarMejorVoz();
-    if (voz) {
-      utterance.voice = voz;
-      utterance.lang = voz.lang;
-    } else {
-      utterance.lang = 'es-AR';
-    }
-    
-    utterance.onstart = () => {
-      btnLeer.textContent = '🔊 Leyendo...';
-      btnLeer.style.background = '#8e44ad';
-    };
-    utterance.onend = () => {
-      btnLeer.textContent = ' Leer';
-      btnLeer.style.background = '';
-    };
-    utterance.onerror = () => {
-      btnLeer.textContent = '🔊 Leer';
-      btnLeer.style.background = '';
-      showToast('⚠️ Error al leer');
-    };
-    
+    if (voz) { utterance.voice = voz; utterance.lang = voz.lang; } else { utterance.lang = 'es-AR'; }
+    utterance.onstart = () => { btnLeer.textContent = '🔊 Leyendo...'; btnLeer.style.background = '#8e44ad'; };
+    utterance.onend = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; };
+    utterance.onerror = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; showToast('⚠️ Error al leer'); };
     window.speechSynthesis.speak(utterance);
     showToast('🔊 Leyendo en voz alta...');
   }
@@ -958,16 +862,14 @@
   function renderModalCategoria() {
     const visibles = getCategoriasVisibles();
     listaCategoriasElegir.innerHTML = visibles.map(cat => 
-      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')">
-        🔵 ${cat.nombre}
-      </button>`
+      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')">🔵 ${cat.nombre}</button>`
     ).join('') || '<p style="color:#95a5a6; text-align:center; padding:12px;">No hay categorías visibles</p>';
 
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
       `<div class="cat-item ${cat.visible ? '' : 'oculta'}">
         <span class="cat-item-nombre">${cat.visible ? '🔵' : '🚫'} ${cat.nombre}</span>
         <div class="cat-item-acciones">
-          <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">️</button>
+          <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
           <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
           ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">🗑️</button>` : ''}
         </div>
@@ -976,9 +878,8 @@
   }
 
   window.seleccionarCategoria = (catNombre) => {
-    if (!entradaActualId) {
-      crearNuevaEntrada("Nueva entrada", catNombre);
-    } else {
+    if (!entradaActualId) crearNuevaEntrada("Nueva entrada", catNombre);
+    else {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
         entrada.categoria = catNombre;
@@ -997,63 +898,36 @@
     if (nuevoNombre && nuevoNombre.trim() && nuevoNombre !== catActual.nombre) {
       const nombreLimpio = nuevoNombre.trim();
       if (categorias.some(c => c.nombre.toLowerCase() === nombreLimpio.toLowerCase())) {
-        showToast("⚠️ Ya existe una categoría con ese nombre");
-        return;
+        showToast("⚠️ Ya existe una categoría con ese nombre"); return;
       }
       categorias[idx].nombre = nombreLimpio;
-      entradas.forEach(e => {
-        if (e.categoria === catActual.nombre) {
-          e.categoria = nombreLimpio;
-          e.fechaModificacion = new Date().toISOString();
-        }
-      });
-      guardarCategorias();
-      guardarEntradasEnStorage();
-      renderModalCategoria();
-      actualizarVistaEntrada();
+      entradas.forEach(e => { if (e.categoria === catActual.nombre) { e.categoria = nombreLimpio; e.fechaModificacion = new Date().toISOString(); } });
+      guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
       showToast(`✏️ Renombrada a: ${nombreLimpio}`);
     }
   };
 
   window.toggleOcultarCategoria = (idx) => {
     categorias[idx].visible = !categorias[idx].visible;
-    guardarCategorias();
-    renderModalCategoria();
+    guardarCategorias(); renderModalCategoria();
     showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
   };
 
   window.eliminarCategoria = (idx) => {
     const cat = categorias[idx];
     if (confirm(`¿Eliminar la categoría "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
-      entradas.forEach(e => {
-        if (e.categoria === cat.nombre) {
-          e.categoria = "Sin categoría";
-          e.fechaModificacion = new Date().toISOString();
-        }
-      });
-      categorias.splice(idx, 1);
-      guardarCategorias();
-      guardarEntradasEnStorage();
-      renderModalCategoria();
-      actualizarVistaEntrada();
+      entradas.forEach(e => { if (e.categoria === cat.nombre) { e.categoria = "Sin categoría"; e.fechaModificacion = new Date().toISOString(); } });
+      categorias.splice(idx, 1); guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
       showToast(`🗑️ Eliminada: ${cat.nombre}`);
     }
   };
 
   btnAgregarCat.addEventListener('click', () => {
     const nombre = nuevaCatInput.value.trim();
-    if (!nombre) {
-      showToast("⚠️ Escribí un nombre");
-      return;
-    }
-    if (categorias.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) {
-      showToast("⚠️ Ya existe una categoría con ese nombre");
-      return;
-    }
+    if (!nombre) { showToast("⚠️ Escribí un nombre"); return; }
+    if (categorias.some(c => c.nombre.toLowerCase() === nombre.toLowerCase())) { showToast("⚠️ Ya existe una categoría con ese nombre"); return; }
     categorias.push({ nombre: nombre, visible: true });
-    guardarCategorias();
-    nuevaCatInput.value = '';
-    renderModalCategoria();
+    guardarCategorias(); nuevaCatInput.value = ''; renderModalCategoria();
     showToast(`✅ Agregada: ${nombre}`);
   });
 
@@ -1062,26 +936,40 @@
   // ==========================================
   btnMic.addEventListener('click', activarMicrofono);
   
+  btnPausar.addEventListener('click', () => {
+    if (!isRecording) return;
+    if (!pausado) {
+      // PAUSAR
+      pausado = true;
+      if (recognitionInstance) { try { recognitionInstance.stop(); } catch(e) {} }
+      btnPausar.textContent = '▶️ Reanudar';
+      btnPausar.style.background = '#27ae60';
+      dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
+    } else {
+      // REANUDAR
+      pausado = false;
+      btnPausar.textContent = '⏸️ Pausar';
+      btnPausar.style.background = '#f39c12';
+      dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>';
+      try { recognitionInstance.start(); } catch(e) {}
+    }
+  });
+
   btnCancelarGrabacion.addEventListener('click', () => {
     if (isRecording) {
-      textoConfirmado = "";
-      textoProvisional = "";
+      textoConfirmado = ""; textoProvisional = "";
       detenerDictadoPro();
       showToast("❌ Dictado cancelado");
     }
   });
   
   btnNuevoFlotante.addEventListener('click', () => {
-    if (isRecording) {
-      detenerDictadoPro();
-    }
+    if (isRecording) detenerDictadoPro();
     crearNuevaEntrada("Nueva entrada", "Sin categoría");
   });
   
   btnBorrar.addEventListener('click', () => {
-    if (isRecording) {
-      detenerDictadoPro();
-    }
+    if (isRecording) detenerDictadoPro();
     if (entradaActualId) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
@@ -1094,33 +982,23 @@
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
       dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
-      showToast("️ Texto borrado");
+      showToast("🗑️ Texto borrado");
     }
   });
 
-  btnCategoria.addEventListener('click', () => {
-    renderModalCategoria();
-    modalCategoria.classList.add('show');
-  });
-
+  btnCategoria.addEventListener('click', () => { renderModalCategoria(); modalCategoria.classList.add('show'); });
   document.getElementById('categoriaClose').addEventListener('click', () => modalCategoria.classList.remove('show'));
   modalCategoria.addEventListener('click', (e) => { if (e.target === modalCategoria) modalCategoria.classList.remove('show'); });
 
   btnCorregir.addEventListener('click', () => {
-    // Si está dictando, detener primero
-    if (isRecording) {
-      detenerDictadoPro();
-    }
+    if (isRecording) detenerDictadoPro();
     isEditing = !isEditing;
     dialogText.contentEditable = isEditing;
     editBadge.classList.toggle('show', isEditing);
     btnListoEdicion.classList.toggle('show', isEditing);
     if (isEditing) {
-      // Cargar el texto actual en el editor
       const entrada = entradas.find(e => e.id === entradaActualId);
-      if (entrada) {
-        dialogText.textContent = entrada.contenido || "";
-      }
+      if (entrada) dialogText.textContent = entrada.contenido || "";
       dialogText.focus();
       showToast('✏️ Modo edición activado');
     } else {
@@ -1136,15 +1014,8 @@
   });
 
   btnListoEdicion.addEventListener('click', () => btnCorregir.click());
-
-  btnPDF.addEventListener('click', () => {
-    if (isRecording) detenerDictadoPro();
-    exportarAPDF();
-  });
-  btnLeer.addEventListener('click', () => {
-    if (isRecording) detenerDictadoPro();
-    leerEnVozAlta();
-  });
+  btnPDF.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); exportarAPDF(); });
+  btnLeer.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); leerEnVozAlta(); });
 
   btnAjustes.addEventListener('click', () => {
     document.getElementById('ajusteTamano').value = ajustes.tamano;
@@ -1152,7 +1023,6 @@
     document.getElementById('ajusteTiempo').value = ajustes.tiempo;
     document.getElementById('ajusteSonido').value = ajustes.sonido;
     document.getElementById('ajusteVelocidad').value = ajustes.velocidadLectura;
-    
     const ajusteVoz = document.getElementById('ajusteVoz');
     ajusteVoz.innerHTML = '<option value="auto">Automática (recomendado)</option>';
     vocesDisponibles.filter(v => v.lang.startsWith('es')).forEach(v => {
@@ -1162,7 +1032,6 @@
       if (v.name === ajustes.vozPreferida) option.selected = true;
       ajusteVoz.appendChild(option);
     });
-    
     modalAjustes.classList.add('show');
   });
 
@@ -1173,51 +1042,41 @@
     ajustes.sonido = document.getElementById('ajusteSonido').value;
     ajustes.velocidadLectura = document.getElementById('ajusteVelocidad').value;
     ajustes.vozPreferida = document.getElementById('ajusteVoz').value;
-    
     localStorage.setItem('escribo_x_mi_ajustes', JSON.stringify(ajustes));
-    
     TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
     dialogText.className = `dialog-text texto-${ajustes.tamano}`;
     document.body.classList.toggle('modo-oscuro', ajustes.modoOscuro === '1');
-    
     modalAjustes.classList.remove('show');
     showToast('✅ Ajustes guardados');
   });
-
   modalAjustes.addEventListener('click', (e) => { if (e.target === modalAjustes) modalAjustes.classList.remove('show'); });
 
   btnHistorial.addEventListener('click', () => {
     const nombresCats = obtenerNombresCategorias();
     filtroCategoria.innerHTML = '<option value="Todas">Todas las categorías</option>' + 
-      nombresCats.map(c => `<option value="${c}">${c}</option>`).join('') +
-      '<option value="Sin categoría">Sin categoría</option>';
-    renderHistorial();
-    modalHistorial.classList.add('show');
+      nombresCats.map(c => `<option value="${c}">${c}</option>`).join('') + '<option value="Sin categoría">Sin categoría</option>';
+    renderHistorial(); modalHistorial.classList.add('show');
   });
 
   function renderHistorial() {
     const busqueda = filtroBusqueda.value.toLowerCase();
     const catFiltro = filtroCategoria.value;
-    
     let filtradas = entradas.filter(e => {
       const coincideBusqueda = e.titulo.toLowerCase().includes(busqueda) || e.contenido.toLowerCase().includes(busqueda);
       const coincideCat = catFiltro === "Todas" || e.categoria === catFiltro;
       return coincideBusqueda && coincideCat;
     });
-
     if (filtradas.length === 0) {
       historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">No se encontraron escritos</p>';
     } else {
       historialList.innerHTML = filtradas.map(e => {
         const fecha = new Date(e.fechaModificacion).toLocaleDateString('es-AR');
         const preview = e.contenido.substring(0, 60) + (e.contenido.length > 60 ? '...' : '');
-        return `
-          <div class="historial-item" onclick="cargarEntrada(${e.id})">
-            <div class="historial-title">${e.titulo}</div>
-            <div class="historial-meta">📂 ${e.categoria} | 📅 ${fecha}</div>
-            <div class="historial-text">${preview || '(Vacío)'}</div>
-          </div>
-        `;
+        return `<div class="historial-item" onclick="cargarEntrada(${e.id})">
+          <div class="historial-title">${e.titulo}</div>
+          <div class="historial-meta">📂 ${e.categoria} | 📅 ${fecha}</div>
+          <div class="historial-text">${preview || '(Vacío)'}</div>
+        </div>`;
       }).join('');
     }
   }
