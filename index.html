@@ -279,7 +279,7 @@
 
 <div class="app-container">
   <div class="dialog-box">
-    <button class="btn-salir" id="btnSalir" title="Salir"></button>
+    <button class="btn-salir" id="btnSalir" title="Salir">✕</button>
     <button class="btn-cancelar-grabacion" id="btnCancelarGrabacion">✖ Cancelar</button>
     <button class="btn-listo-edicion" id="btnListoEdicion">✓ Listo</button>
     <button class="btn-nuevo-flotante" id="btnNuevoFlotante">➕ Nuevo</button>
@@ -295,7 +295,7 @@
   <div class="controls">
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHistorial"> Historial</button>
+        <button class="btn-side" id="btnHistorial">📋 Historial</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
@@ -315,7 +315,10 @@
         <button class="btn-side" id="btnPDF"> PDF</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnLeer">🔊 Leer</button>
+        <button class="btn-side" id="btnLeer"> Leer</button>
+      </div>
+      <div class="btn-wrapper">
+        <button class="btn-side" id="btnCopiar"> Copiar</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnCategoria">📂 Categoría</button>
@@ -326,7 +329,7 @@
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
       <div class="ad-slide">📢 Escribo x mi: Tu historia, tus palabras.</div>
-      <div class="ad-slide">🎙️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
+      <div class="ad-slide">️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
       <div class="ad-slide">⭐ Hecho con cariño para dejar una huella.</div>
     </div>
     <div class="ad-dots" id="adDots">
@@ -372,9 +375,9 @@
 <!-- MODAL AJUSTES -->
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
-    <h3>️ Ajustes</h3>
+    <h3>⚙️ Ajustes</h3>
     <div class="ajuste-opcion">
-      <label>🔤 Tamaño de texto</label>
+      <label> Tamaño de texto</label>
       <select id="ajusteTamano">
         <option value="chico">Chico</option>
         <option value="normal" selected>Normal</option>
@@ -389,7 +392,7 @@
       </select>
     </div>
     <div class="ajuste-opcion">
-      <label>️ Tiempo de escucha</label>
+      <label>⏱️ Tiempo de escucha</label>
       <select id="ajusteTiempo">
         <option value="3000">Corto (3 seg)</option>
         <option value="5000" selected>Normal (5 seg)</option>
@@ -459,6 +462,7 @@
   let reinicioPendiente = false;
   let textoConfirmado = "";
   let textoProvisional = "";
+  let ultimoSonido = 0; // Para espaciar el sonido
   
   let isEditing = false;
   let recognitionInstance = null;
@@ -486,6 +490,7 @@
   const btnCorregir = document.getElementById('btnCorregir');
   const btnPDF = document.getElementById('btnPDF');
   const btnLeer = document.getElementById('btnLeer');
+  const btnCopiar = document.getElementById('btnCopiar');
   const btnHistorial = document.getElementById('btnHistorial');
   const btnAjustes = document.getElementById('btnAjustes');
   const btnNuevoFlotante = document.getElementById('btnNuevoFlotante');
@@ -535,13 +540,21 @@
   // ==========================================
   function guardarEntradasEnStorage() { localStorage.setItem('escribo_x_mi_entradas', JSON.stringify(entradas)); }
 
+  function generarTituloDesdeContenido(contenido) {
+    if (!contenido) return "Sin título";
+    // Tomar las primeras 6 palabras
+    const palabras = contenido.trim().split(/\s+/).slice(0, 6).join(' ');
+    // Capitalizar primera letra
+    return palabras.charAt(0).toUpperCase() + palabras.slice(1) + (contenido.trim().split(/\s+/).length > 6 ? '...' : '');
+  }
+
   function crearNuevaEntrada(titulo = "Nueva entrada", categoria = "Sin categoría") {
     entradaActualId = Date.now();
     const nueva = { id: entradaActualId, titulo: titulo, categoria: categoria, contenido: "", fechaCreacion: new Date().toISOString(), fechaModificacion: new Date().toISOString() };
     entradas.unshift(nueva);
     guardarEntradasEnStorage();
     actualizarVistaEntrada();
-    showToast(`📝 Creado: ${titulo}`);
+    showToast(` Creado: ${titulo}`);
   }
 
   function cargarEntrada(id) {
@@ -556,11 +569,11 @@
     if (entrada) {
       dialogText.textContent = entrada.contenido || "";
       const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
-      dialogMeta.textContent = ` Categoría: ${entrada.categoria} | 📝 Modificado: ${fecha}`;
+      dialogMeta.textContent = `📂 Categoría: ${entrada.categoria} | 📝 Modificado: ${fecha}`;
       if (dialogText.textContent === "") { dialogText.textContent = "Presioná el micrófono y empezá a dictar..."; }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
-      dialogMeta.textContent = "📂 Categoría: Sin categoría |  Nuevo";
+      dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
     }
     scrollAlFinal();
   }
@@ -656,7 +669,7 @@
     btnPausar.textContent = '⏸️ Pausar';
     btnPausar.style.background = '#f39c12';
     
-    dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado activo. Tocá el mic para finalizar.</span>';
+    dialogMeta.innerHTML = '<span class="estado-dictado">️ Dictado activo. Tocá el mic para finalizar.</span>';
     
     if (!entradaActualId) crearNuevaEntrada("Nota de voz", "Sin categoría");
     iniciarReconocimientoPro();
@@ -673,7 +686,7 @@
     recognitionInstance.onstart = () => {
       btnMic.classList.add('recording');
       if (dictando && !pausado) {
-        dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>';
+        dialogMeta.innerHTML = '<span class="estado-dictado">️ Escuchando...</span>';
       }
     };
 
@@ -698,8 +711,8 @@
 
     recognitionInstance.onerror = (event) => {
       if (event.error === 'no-speech') return;
-      if (event.error === 'not-allowed') { showToast('⚠️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
-      if (event.error === 'network') { showToast('⚠️ El dictado requiere conexión'); detenerDictadoPro(); }
+      if (event.error === 'not-allowed') { showToast('️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
+      if (event.error === 'network') { showToast('️ El dictado requiere conexión'); detenerDictadoPro(); }
     };
 
     recognitionInstance.onend = () => {
@@ -713,7 +726,7 @@
           }
         }, 250);
       } else if (pausado) {
-        dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
+        dialogMeta.innerHTML = '<span class="estado-dictado">️ En pausa. Tocá "Reanudar" para seguir.</span>';
       }
     };
 
@@ -730,6 +743,11 @@
     if (textoConfirmado.trim()) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
+        // CORRECCIÓN: Actualizar título automáticamente si es genérico
+        if (entrada.titulo === "Nueva entrada" || entrada.titulo === "Nota de voz" || entrada.titulo === "Sin título") {
+          entrada.titulo = generarTituloDesdeContenido(textoConfirmado);
+        }
+        
         if (entrada.contenido === "" || entrada.contenido.includes("Presioná el micrófono")) {
           entrada.contenido = textoConfirmado;
         } else {
@@ -781,8 +799,14 @@
     toast.textContent = msg; toast.classList.add('show');
     setTimeout(() => toast.classList.remove('show'), 2500);
   }
+  
+  // CORRECCIÓN: Sonido más espaciado (mínimo 8 segundos entre sonidos)
   function sonidoConfirmacion() {
     if (ajustes.sonido !== '1') return;
+    const ahora = Date.now();
+    if (ahora - ultimoSonido < 8000) return; // No sonar si pasaron menos de 8 segundos
+    ultimoSonido = ahora;
+    
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -795,25 +819,27 @@
     } catch(e) {}
   }
   
+  // CORRECCIÓN: Leer el texto corregido y apagar el botón siempre
   function leerEnVozAlta() {
-    const entrada = entradas.find(e => e.id === entradaActualId);
-    let texto = entrada ? entrada.contenido : dialogText.textContent;
-    if (!texto || texto.includes("Presioná el micrófono")) { showToast('️ No hay texto para leer'); return; }
+    // Si está en modo edición, leer lo que hay en pantalla (texto corregido)
+    let texto;
+    if (isEditing) {
+      texto = dialogText.textContent;
+    } else {
+      const entrada = entradas.find(e => e.id === entradaActualId);
+      texto = entrada ? entrada.contenido : dialogText.textContent;
+    }
+    
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para leer'); return; }
     if (!('speechSynthesis' in window)) { showToast('⚠️ Tu navegador no soporta lectura en voz alta'); return; }
     
-    // MEJORA: Preparar el texto para una lectura natural
-    // 1. Asegurar espacios después de signos de puntuación existentes
+    // Preparar el texto para lectura natural
     texto = texto.replace(/([.,;:!?¿¡])/g, '$1 ');
-    
-    // 2. Agregar comas automáticas antes de conectores comunes si no hay puntuación
     const conectores = ['y', 'pero', 'entonces', 'después', 'aunque', 'así que', 'sin embargo', 'porque', 'o'];
     conectores.forEach(conector => {
-      // Busca el conector si no está al inicio y no tiene puntuación justo antes
       const regex = new RegExp(`(?<![.,;:!?¿¡\\s])\\s+(${conector})\\s`, 'gi');
       texto = texto.replace(regex, `, $1 `);
     });
-
-    // 3. Limpiar espacios dobles
     texto = texto.replace(/\s+/g, ' ').trim();
     
     window.speechSynthesis.cancel();
@@ -823,12 +849,66 @@
     const voz = buscarMejorVoz();
     if (voz) { utterance.voice = voz; utterance.lang = voz.lang; } else { utterance.lang = 'es-AR'; }
     
+    // Función para resetear el botón
+    const resetearBoton = () => {
+      btnLeer.textContent = '🔊 Leer';
+      btnLeer.style.background = '';
+    };
+    
     utterance.onstart = () => { btnLeer.textContent = '🔊 Leyendo...'; btnLeer.style.background = '#8e44ad'; };
-    utterance.onend = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; };
-    utterance.onerror = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; showToast('⚠️ Error al leer'); };
+    utterance.onend = () => { resetearBoton(); };
+    utterance.onerror = () => { resetearBoton(); showToast('⚠️ Error al leer'); };
+    
+    // CORRECCIÓN: Timeout de seguridad por si onend no se dispara
+    const duracionEstimada = (texto.length / 15) * 1000 / utterance.rate; // ms aproximados
+    const timeoutSeguridad = setTimeout(() => {
+      resetearBoton();
+    }, duracionEstimada + 5000); // 5 segundos de margen
+    
+    utterance.onend = () => { clearTimeout(timeoutSeguridad); resetearBoton(); };
+    utterance.onerror = () => { clearTimeout(timeoutSeguridad); resetearBoton(); showToast('⚠️ Error al leer'); };
     
     window.speechSynthesis.speak(utterance);
     showToast(' Leyendo en voz alta...');
+  }
+
+  // NUEVO: Función copiar al portapapeles
+  function copiarAlPortapapeles() {
+    let texto;
+    if (isEditing) {
+      texto = dialogText.textContent;
+    } else {
+      const entrada = entradas.find(e => e.id === entradaActualId);
+      texto = entrada ? entrada.contenido : dialogText.textContent;
+    }
+    
+    if (!texto || texto.includes("Presioná el micrófono")) { 
+      showToast('⚠️ No hay texto para copiar'); 
+      return; 
+    }
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(() => {
+        showToast(' Texto copiado al portapapeles');
+      }).catch(() => {
+        // Fallback para navegadores antiguos
+        const textarea = document.createElement('textarea');
+        textarea.value = texto;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand('copy');
+          showToast('📋 Texto copiado al portapapeles');
+        } catch(e) {
+          showToast('⚠️ No se pudo copiar');
+        }
+        document.body.removeChild(textarea);
+      });
+    } else {
+      showToast('⚠️ Tu navegador no soporta copiar');
+    }
   }
 
   // ==========================================
@@ -842,11 +922,11 @@
 
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
       `<div class="cat-item ${cat.visible ? '' : 'oculta'}">
-        <span class="cat-item-nombre">${cat.visible ? '🔵' : ''} ${cat.nombre}</span>
+        <span class="cat-item-nombre">${cat.visible ? '🔵' : '🚫'} ${cat.nombre}</span>
         <div class="cat-item-acciones">
           <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
           <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
-          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">️</button>` : ''}
+          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">🗑️</button>` : ''}
         </div>
       </div>`
     ).join('');
@@ -881,7 +961,7 @@
   window.toggleOcultarCategoria = (idx) => {
     categorias[idx].visible = !categorias[idx].visible;
     guardarCategorias(); renderModalCategoria();
-    showToast(categorias[idx].visible ? `️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
+    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
   };
 
   window.eliminarCategoria = (idx) => {
@@ -889,7 +969,7 @@
     if (confirm(`¿Eliminar "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
       entradas.forEach(e => { if (e.categoria === cat.nombre) { e.categoria = "Sin categoría"; e.fechaModificacion = new Date().toISOString(); } });
       categorias.splice(idx, 1); guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
-      showToast(`🗑️ Eliminada: ${cat.nombre}`);
+      showToast(`️ Eliminada: ${cat.nombre}`);
     }
   };
 
@@ -914,7 +994,7 @@
       if (recognitionInstance) { try { recognitionInstance.stop(); } catch(e) {} }
       btnPausar.textContent = '▶️ Reanudar';
       btnPausar.style.background = '#27ae60';
-      dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
+      dialogMeta.innerHTML = '<span class="estado-dictado">️ En pausa. Tocá "Reanudar" para seguir.</span>';
     } else {
       pausado = false;
       btnPausar.textContent = '⏸️ Pausar';
@@ -944,7 +1024,7 @@
       }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
-      dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
+      dialogMeta.textContent = " Categoría: Sin categoría | 📝 Nuevo";
       showToast("🗑️ Texto borrado");
     }
   });
@@ -966,7 +1046,15 @@
       showToast('✏️ Modo edición activado');
     } else {
       const entrada = entradas.find(e => e.id === entradaActualId);
-      if (entrada) { entrada.contenido = dialogText.textContent; entrada.fechaModificacion = new Date().toISOString(); guardarEntradasEnStorage(); }
+      if (entrada) { 
+        entrada.contenido = dialogText.textContent; 
+        // CORRECCIÓN: Actualizar título si es genérico
+        if (entrada.titulo === "Nueva entrada" || entrada.titulo === "Nota de voz" || entrada.titulo === "Sin título") {
+          entrada.titulo = generarTituloDesdeContenido(dialogText.textContent);
+        }
+        entrada.fechaModificacion = new Date().toISOString(); 
+        guardarEntradasEnStorage(); 
+      }
       showToast('✅ Cambios guardados');
       actualizarVistaEntrada();
     }
@@ -975,6 +1063,7 @@
   btnListoEdicion.addEventListener('click', () => btnCorregir.click());
   btnPDF.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); exportarAPDF(); });
   btnLeer.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); leerEnVozAlta(); });
+  btnCopiar.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); copiarAlPortapapeles(); });
 
   btnAjustes.addEventListener('click', () => {
     document.getElementById('ajusteTamano').value = ajustes.tamano;
