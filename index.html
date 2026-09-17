@@ -227,11 +227,13 @@
   }
   .btn-listo-edicion.show { display: flex; }
   
-  .ajuste-opcion {
+  .ajuste-opcion, .herramienta-btn {
     display: flex; justify-content: space-between; align-items: center;
     padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
+    cursor: pointer; border: none; width: 100%; text-align: left; font-size: 1rem; font-weight: 600; color: #2c3e50;
   }
-  body.modo-oscuro .ajuste-opcion { background: #1a1a1a; }
+  .herramienta-btn { justify-content: center; gap: 10px; font-size: 1.1rem; }
+  body.modo-oscuro .ajuste-opcion, body.modo-oscuro .herramienta-btn { background: #1a1a1a; color: #e5e5e5; }
   .ajuste-opcion label { font-size: 0.95rem; font-weight: 600; color: #2c3e50; }
   body.modo-oscuro .ajuste-opcion label { color: #e5e5e5; }
   .ajuste-opcion select {
@@ -273,6 +275,16 @@
     font-size: 1.05rem;
     margin-top: 4px;
   }
+
+  /* Pestañas para el historial */
+  .tabs-historial { display: flex; gap: 8px; margin-bottom: 12px; }
+  .tab-historial {
+    flex: 1; padding: 10px; background: #e5e7eb; border: none; border-radius: 8px;
+    font-weight: 600; color: #4b5563; cursor: pointer;
+  }
+  .tab-historial.activa { background: #3498db; color: white; }
+  body.modo-oscuro .tab-historial { background: #374151; color: #9ca3af; }
+  body.modo-oscuro .tab-historial.activa { background: #3498db; color: white; }
 </style>
 </head>
 <body>
@@ -312,16 +324,16 @@
         <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnPDF"> PDF</button>
+        <button class="btn-side" id="btnPDF">📄 PDF</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnLeer"> Leer</button>
+        <button class="btn-side" id="btnLeer">🔊 Leer</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnCopiar"> Copiar</button>
+        <button class="btn-side" id="btnCopiar">📋 Copiar</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnCategoria">📂 Categoría</button>
+        <button class="btn-side" id="btnHerramientas">🛠️ Herram.</button>
       </div>
     </div>
   </div>
@@ -329,7 +341,7 @@
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
       <div class="ad-slide">📢 Escribo x mi: Tu historia, tus palabras.</div>
-      <div class="ad-slide">️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
+      <div class="ad-slide">🎙️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
       <div class="ad-slide">⭐ Hecho con cariño para dejar una huella.</div>
     </div>
     <div class="ad-dots" id="adDots">
@@ -346,14 +358,36 @@
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal">
     <h3>📋 Mis Escritos</h3>
+    <div class="tabs-historial">
+      <button class="tab-historial activa" id="tabActivas" onclick="cambiarTabHistorial('activas')">Activas</button>
+      <button class="tab-historial" id="tabArchivadas" onclick="cambiarTabHistorial('archivadas')">Archivadas</button>
+    </div>
     <div class="filtro-container">
       <input type="text" id="filtroBusqueda" placeholder="🔍 Buscar por título...">
       <select id="filtroCategoria">
         <option value="Todas">Todas las categorías</option>
       </select>
+      <select id="filtroOrden">
+        <option value="recentes">Más recientes</option>
+        <option value="antiguas">Más antiguas</option>
+        <option value="alfa">Alfabético (A-Z)</option>
+      </select>
     </div>
     <div id="historialList"></div>
     <button class="modal-close" id="historialClose">Cerrar</button>
+  </div>
+</div>
+
+<!-- MODAL HERRAMIENTAS -->
+<div class="modal-overlay" id="modalHerramientas">
+  <div class="modal">
+    <h3>🛠️ Herramientas</h3>
+    <button class="herramienta-btn" onclick="compartirTexto()">📤 Compartir esta entrada</button>
+    <button class="herramienta-btn" onclick="archivarEntradaActual()">📦 Archivar entrada actual</button>
+    <button class="herramienta-btn" onclick="descargarBackup()">💾 Descargar Backup</button>
+    <button class="herramienta-btn" onclick="document.getElementById('inputRestaurar').click()">📥 Restaurar Backup</button>
+    <input type="file" id="inputRestaurar" accept=".json" style="display:none" onchange="restaurarBackup(event)">
+    <button class="modal-close" onclick="document.getElementById('modalHerramientas').classList.remove('show')">Cerrar</button>
   </div>
 </div>
 
@@ -375,9 +409,9 @@
 <!-- MODAL AJUSTES -->
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
-    <h3>⚙️ Ajustes</h3>
+    <h3>️ Ajustes</h3>
     <div class="ajuste-opcion">
-      <label> Tamaño de texto</label>
+      <label>🔤 Tamaño de texto</label>
       <select id="ajusteTamano">
         <option value="chico">Chico</option>
         <option value="normal" selected>Normal</option>
@@ -407,7 +441,7 @@
       </select>
     </div>
     <div class="ajuste-opcion">
-      <label>🐢 Velocidad de lectura</label>
+      <label> Velocidad de lectura</label>
       <select id="ajusteVelocidad">
         <option value="0.6">Muy lenta</option>
         <option value="0.75" selected>Normal lenta</option>
@@ -454,7 +488,11 @@
   // ESTADO (DICTADO PRO)
   // ==========================================
   let entradas = JSON.parse(localStorage.getItem('escribo_x_mi_entradas') || '[]');
+  // Migración simple para entradas viejas que no tienen 'archivada'
+  entradas.forEach(e => { if (e.archivada === undefined) e.archivada = false; });
+  
   let entradaActualId = null;
+  let tabHistorialActual = 'activas'; // 'activas' o 'archivadas'
   
   let isRecording = false;
   let dictando = false;
@@ -462,7 +500,7 @@
   let reinicioPendiente = false;
   let textoConfirmado = "";
   let textoProvisional = "";
-  let ultimoSonido = 0; // Para espaciar el sonido
+  let ultimoSonido = 0;
   
   let isEditing = false;
   let recognitionInstance = null;
@@ -491,6 +529,7 @@
   const btnPDF = document.getElementById('btnPDF');
   const btnLeer = document.getElementById('btnLeer');
   const btnCopiar = document.getElementById('btnCopiar');
+  const btnHerramientas = document.getElementById('btnHerramientas');
   const btnHistorial = document.getElementById('btnHistorial');
   const btnAjustes = document.getElementById('btnAjustes');
   const btnNuevoFlotante = document.getElementById('btnNuevoFlotante');
@@ -501,6 +540,7 @@
   const btnAgregarCat = document.getElementById('btnAgregarCat');
   const nuevaCatInput = document.getElementById('nuevaCatInput');
   const modalHistorial = document.getElementById('modalHistorial');
+  const modalHerramientas = document.getElementById('modalHerramientas');
   const modalCategoria = document.getElementById('modalCategoria');
   const modalAjustes = document.getElementById('modalAjustes');
   const historialList = document.getElementById('historialList');
@@ -508,18 +548,14 @@
   const listaCategoriasGestionar = document.getElementById('listaCategoriasGestionar');
   const filtroBusqueda = document.getElementById('filtroBusqueda');
   const filtroCategoria = document.getElementById('filtroCategoria');
+  const filtroOrden = document.getElementById('filtroOrden');
   const toast = document.getElementById('toast');
 
   // ==========================================
   // VOCES
   // ==========================================
-  function cargarVoces() {
-    if ('speechSynthesis' in window) { vocesDisponibles = window.speechSynthesis.getVoices(); }
-  }
-  if ('speechSynthesis' in window) {
-    cargarVoces();
-    window.speechSynthesis.onvoiceschanged = cargarVoces;
-  }
+  function cargarVoces() { if ('speechSynthesis' in window) { vocesDisponibles = window.speechSynthesis.getVoices(); } }
+  if ('speechSynthesis' in window) { cargarVoces(); window.speechSynthesis.onvoiceschanged = cargarVoces; }
 
   function buscarMejorVoz() {
     if (vocesDisponibles.length === 0) return null;
@@ -542,19 +578,17 @@
 
   function generarTituloDesdeContenido(contenido) {
     if (!contenido) return "Sin título";
-    // Tomar las primeras 6 palabras
     const palabras = contenido.trim().split(/\s+/).slice(0, 6).join(' ');
-    // Capitalizar primera letra
     return palabras.charAt(0).toUpperCase() + palabras.slice(1) + (contenido.trim().split(/\s+/).length > 6 ? '...' : '');
   }
 
   function crearNuevaEntrada(titulo = "Nueva entrada", categoria = "Sin categoría") {
     entradaActualId = Date.now();
-    const nueva = { id: entradaActualId, titulo: titulo, categoria: categoria, contenido: "", fechaCreacion: new Date().toISOString(), fechaModificacion: new Date().toISOString() };
+    const nueva = { id: entradaActualId, titulo: titulo, categoria: categoria, contenido: "", archivada: false, fechaCreacion: new Date().toISOString(), fechaModificacion: new Date().toISOString() };
     entradas.unshift(nueva);
     guardarEntradasEnStorage();
     actualizarVistaEntrada();
-    showToast(` Creado: ${titulo}`);
+    showToast(`📝 Creado: ${titulo}`);
   }
 
   function cargarEntrada(id) {
@@ -569,7 +603,8 @@
     if (entrada) {
       dialogText.textContent = entrada.contenido || "";
       const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
-      dialogMeta.textContent = `📂 Categoría: ${entrada.categoria} | 📝 Modificado: ${fecha}`;
+      let estado = entrada.archivada ? " (Archivada)" : "";
+      dialogMeta.textContent = `📂 Categoría: ${entrada.categoria}${estado} | 📝 Modificado: ${fecha}`;
       if (dialogText.textContent === "") { dialogText.textContent = "Presioná el micrófono y empezá a dictar..."; }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
@@ -669,7 +704,7 @@
     btnPausar.textContent = '⏸️ Pausar';
     btnPausar.style.background = '#f39c12';
     
-    dialogMeta.innerHTML = '<span class="estado-dictado">️ Dictado activo. Tocá el mic para finalizar.</span>';
+    dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado activo. Tocá el mic para finalizar.</span>';
     
     if (!entradaActualId) crearNuevaEntrada("Nota de voz", "Sin categoría");
     iniciarReconocimientoPro();
@@ -685,9 +720,7 @@
     
     recognitionInstance.onstart = () => {
       btnMic.classList.add('recording');
-      if (dictando && !pausado) {
-        dialogMeta.innerHTML = '<span class="estado-dictado">️ Escuchando...</span>';
-      }
+      if (dictando && !pausado) { dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>'; }
     };
 
     recognitionInstance.onresult = (event) => {
@@ -743,11 +776,9 @@
     if (textoConfirmado.trim()) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) {
-        // CORRECCIÓN: Actualizar título automáticamente si es genérico
         if (entrada.titulo === "Nueva entrada" || entrada.titulo === "Nota de voz" || entrada.titulo === "Sin título") {
           entrada.titulo = generarTituloDesdeContenido(textoConfirmado);
         }
-        
         if (entrada.contenido === "" || entrada.contenido.includes("Presioná el micrófono")) {
           entrada.contenido = textoConfirmado;
         } else {
@@ -769,7 +800,7 @@
   function exportarAPDF() {
     const entrada = entradas.find(e => e.id === entradaActualId);
     if (!entrada || !entrada.contenido.trim() || entrada.contenido.includes("Presioná el micrófono")) {
-      showToast("⚠️ No hay texto para exportar"); return;
+      showToast("️ No hay texto para exportar"); return;
     }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -786,27 +817,20 @@
     doc.text("Generado con Escribo x mi", 20, 280);
     const nombreArchivo = `${entrada.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     doc.save(nombreArchivo);
-    showToast("📄 PDF generado y descargado");
+    showToast(" PDF generado y descargado");
   }
 
   // ==========================================
-  // UTILIDADES
+  // UTILIDADES Y HERRAMIENTAS
   // ==========================================
-  function scrollAlFinal() {
-    setTimeout(() => { dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight; }, 50);
-  }
-  function showToast(msg) {
-    toast.textContent = msg; toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
+  function scrollAlFinal() { setTimeout(() => { dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight; }, 50); }
+  function showToast(msg) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   
-  // CORRECCIÓN: Sonido más espaciado (mínimo 8 segundos entre sonidos)
   function sonidoConfirmacion() {
     if (ajustes.sonido !== '1') return;
     const ahora = Date.now();
-    if (ahora - ultimoSonido < 8000) return; // No sonar si pasaron menos de 8 segundos
+    if (ahora - ultimoSonido < 8000) return;
     ultimoSonido = ahora;
-    
     try {
       if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -819,21 +843,14 @@
     } catch(e) {}
   }
   
-  // CORRECCIÓN: Leer el texto corregido y apagar el botón siempre
   function leerEnVozAlta() {
-    // Si está en modo edición, leer lo que hay en pantalla (texto corregido)
     let texto;
-    if (isEditing) {
-      texto = dialogText.textContent;
-    } else {
-      const entrada = entradas.find(e => e.id === entradaActualId);
-      texto = entrada ? entrada.contenido : dialogText.textContent;
-    }
+    if (isEditing) { texto = dialogText.textContent; } 
+    else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
     
     if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para leer'); return; }
     if (!('speechSynthesis' in window)) { showToast('⚠️ Tu navegador no soporta lectura en voz alta'); return; }
     
-    // Preparar el texto para lectura natural
     texto = texto.replace(/([.,;:!?¿¡])/g, '$1 ');
     const conectores = ['y', 'pero', 'entonces', 'después', 'aunque', 'así que', 'sin embargo', 'porque', 'o'];
     conectores.forEach(conector => {
@@ -849,22 +866,13 @@
     const voz = buscarMejorVoz();
     if (voz) { utterance.voice = voz; utterance.lang = voz.lang; } else { utterance.lang = 'es-AR'; }
     
-    // Función para resetear el botón
-    const resetearBoton = () => {
-      btnLeer.textContent = '🔊 Leer';
-      btnLeer.style.background = '';
-    };
-    
-    utterance.onstart = () => { btnLeer.textContent = '🔊 Leyendo...'; btnLeer.style.background = '#8e44ad'; };
+    const resetearBoton = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; };
+    utterance.onstart = () => { btnLeer.textContent = ' Leyendo...'; btnLeer.style.background = '#8e44ad'; };
     utterance.onend = () => { resetearBoton(); };
     utterance.onerror = () => { resetearBoton(); showToast('⚠️ Error al leer'); };
     
-    // CORRECCIÓN: Timeout de seguridad por si onend no se dispara
-    const duracionEstimada = (texto.length / 15) * 1000 / utterance.rate; // ms aproximados
-    const timeoutSeguridad = setTimeout(() => {
-      resetearBoton();
-    }, duracionEstimada + 5000); // 5 segundos de margen
-    
+    const duracionEstimada = (texto.length / 15) * 1000 / utterance.rate;
+    const timeoutSeguridad = setTimeout(() => { resetearBoton(); }, duracionEstimada + 5000);
     utterance.onend = () => { clearTimeout(timeoutSeguridad); resetearBoton(); };
     utterance.onerror = () => { clearTimeout(timeoutSeguridad); resetearBoton(); showToast('⚠️ Error al leer'); };
     
@@ -872,43 +880,90 @@
     showToast(' Leyendo en voz alta...');
   }
 
-  // NUEVO: Función copiar al portapapeles
   function copiarAlPortapapeles() {
     let texto;
-    if (isEditing) {
-      texto = dialogText.textContent;
-    } else {
-      const entrada = entradas.find(e => e.id === entradaActualId);
-      texto = entrada ? entrada.contenido : dialogText.textContent;
-    }
-    
-    if (!texto || texto.includes("Presioná el micrófono")) { 
-      showToast('⚠️ No hay texto para copiar'); 
-      return; 
-    }
-    
+    if (isEditing) { texto = dialogText.textContent; } 
+    else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para copiar'); return; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(texto).then(() => {
-        showToast(' Texto copiado al portapapeles');
-      }).catch(() => {
-        // Fallback para navegadores antiguos
-        const textarea = document.createElement('textarea');
-        textarea.value = texto;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-          document.execCommand('copy');
-          showToast('📋 Texto copiado al portapapeles');
-        } catch(e) {
-          showToast('⚠️ No se pudo copiar');
-        }
-        document.body.removeChild(textarea);
-      });
+      navigator.clipboard.writeText(texto).then(() => { showToast('📋 Texto copiado'); }).catch(() => { showToast('⚠️ Error al copiar'); });
+    } else { showToast('⚠️ Tu navegador no soporta copiar'); }
+  }
+
+  // NUEVAS HERRAMIENTAS
+  function compartirTexto() {
+    let texto;
+    if (isEditing) { texto = dialogText.textContent; } 
+    else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para compartir'); return; }
+    
+    if (navigator.share) {
+      navigator.share({ title: 'Escribo x mi', text: texto }).catch(() => {});
     } else {
-      showToast('⚠️ Tu navegador no soporta copiar');
+      copiarAlPortapapeles();
+      showToast('📋 Copiado (tu navegador no soporta compartir directo)');
     }
+    document.getElementById('modalHerramientas').classList.remove('show');
+  }
+
+  function archivarEntradaActual() {
+    if (!entradaActualId) { showToast("⚠️ No hay entrada abierta"); return; }
+    const entrada = entradas.find(e => e.id === entradaActualId);
+    if (entrada) {
+      entrada.archivada = !entrada.archivada;
+      entrada.fechaModificacion = new Date().toISOString();
+      guardarEntradasEnStorage();
+      actualizarVistaEntrada();
+      showToast(entrada.archivada ? "📦 Entrada archivada" : "📤 Entrada desarquivada");
+    }
+    document.getElementById('modalHerramientas').classList.remove('show');
+  }
+
+  function descargarBackup() {
+    const datos = {
+      entradas: entradas,
+      categorias: categorias,
+      ajustes: ajustes,
+      fechaExportacion: new Date().toISOString()
+    };
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(datos));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", "backup_escribo_x_mi_" + new Date().toISOString().slice(0,10) + ".json");
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    showToast("💾 Backup descargado");
+    document.getElementById('modalHerramientas').classList.remove('show');
+  }
+
+  function restaurarBackup(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      try {
+        const datos = JSON.parse(e.target.result);
+        if (datos.entradas) {
+          entradas = datos.entradas;
+          entradas.forEach(ent => { if (ent.archivada === undefined) ent.archivada = false; });
+          localStorage.setItem('escribo_x_mi_entradas', JSON.stringify(entradas));
+        }
+        if (datos.categorias) {
+          categorias = datos.categorias;
+          localStorage.setItem('escribo_x_mi_categorias', JSON.stringify(categorias));
+        }
+        if (datos.ajustes) {
+          ajustes = { ...ajustes, ...datos.ajustes };
+          localStorage.setItem('escribo_x_mi_ajustes', JSON.stringify(ajustes));
+        }
+        showToast("✅ Backup restaurado. Recargando...");
+        setTimeout(() => location.reload(), 1500);
+      } catch (err) {
+        showToast("⚠️ Archivo de backup inválido");
+      }
+    };
+    reader.readAsText(file);
   }
 
   // ==========================================
@@ -922,7 +977,7 @@
 
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
       `<div class="cat-item ${cat.visible ? '' : 'oculta'}">
-        <span class="cat-item-nombre">${cat.visible ? '🔵' : '🚫'} ${cat.nombre}</span>
+        <span class="cat-item-nombre">${cat.visible ? '' : '🚫'} ${cat.nombre}</span>
         <div class="cat-item-acciones">
           <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
           <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
@@ -961,7 +1016,7 @@
   window.toggleOcultarCategoria = (idx) => {
     categorias[idx].visible = !categorias[idx].visible;
     guardarCategorias(); renderModalCategoria();
-    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
+    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : ` Oculta: ${categorias[idx].nombre}`);
   };
 
   window.eliminarCategoria = (idx) => {
@@ -1024,7 +1079,7 @@
       }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
-      dialogMeta.textContent = " Categoría: Sin categoría | 📝 Nuevo";
+      dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
       showToast("🗑️ Texto borrado");
     }
   });
@@ -1048,7 +1103,6 @@
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) { 
         entrada.contenido = dialogText.textContent; 
-        // CORRECCIÓN: Actualizar título si es genérico
         if (entrada.titulo === "Nueva entrada" || entrada.titulo === "Nota de voz" || entrada.titulo === "Sin título") {
           entrada.titulo = generarTituloDesdeContenido(dialogText.textContent);
         }
@@ -1064,6 +1118,7 @@
   btnPDF.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); exportarAPDF(); });
   btnLeer.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); leerEnVozAlta(); });
   btnCopiar.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); copiarAlPortapapeles(); });
+  btnHerramientas.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); modalHerramientas.classList.add('show'); });
 
   btnAjustes.addEventListener('click', () => {
     document.getElementById('ajusteTamano').value = ajustes.tamano;
@@ -1098,6 +1153,14 @@
   });
   modalAjustes.addEventListener('click', (e) => { if (e.target === modalAjustes) modalAjustes.classList.remove('show'); });
 
+  // Lógica del Historial
+  window.cambiarTabHistorial = (tab) => {
+    tabHistorialActual = tab;
+    document.getElementById('tabActivas').classList.toggle('activa', tab === 'activas');
+    document.getElementById('tabArchivadas').classList.toggle('activa', tab === 'archivadas');
+    renderHistorial();
+  };
+
   btnHistorial.addEventListener('click', () => {
     const nombresCats = obtenerNombresCategorias();
     filtroCategoria.innerHTML = '<option value="Todas">Todas las categorías</option>' + 
@@ -1108,14 +1171,27 @@
   function renderHistorial() {
     const busqueda = filtroBusqueda.value.toLowerCase();
     const catFiltro = filtroCategoria.value;
+    const orden = filtroOrden.value;
+    
     let filtradas = entradas.filter(e => {
+      const esArchivada = e.archivada || false;
+      const coincideTab = (tabHistorialActual === 'activas' && !esArchivada) || (tabHistorialActual === 'archivadas' && esArchivada);
       const coincideBusqueda = e.titulo.toLowerCase().includes(busqueda) || e.contenido.toLowerCase().includes(busqueda);
       const coincideCat = catFiltro === "Todas" || e.categoria === catFiltro;
-      return coincideBusqueda && coincideCat;
+      return coincideTab && coincideBusqueda && coincideCat;
     });
+
+    // Ordenamiento
+    if (orden === 'recentes') {
+      filtradas.sort((a, b) => new Date(b.fechaModificacion) - new Date(a.fechaModificacion));
+    } else if (orden === 'antiguas') {
+      filtradas.sort((a, b) => new Date(a.fechaModificacion) - new Date(b.fechaModificacion));
+    } else if (orden === 'alfa') {
+      filtradas.sort((a, b) => a.titulo.localeCompare(b.titulo));
+    }
     
     if (filtradas.length === 0) {
-      historialList.innerHTML = '<p style="color: #95a5a6; text-align: center; padding: 20px;">No se encontraron escritos</p>';
+      historialList.innerHTML = `<p style="color: #95a5a6; text-align: center; padding: 20px;">No hay entradas ${tabHistorialActual}</p>`;
     } else {
       historialList.innerHTML = filtradas.map(e => {
         const fecha = new Date(e.fechaModificacion).toLocaleDateString('es-AR');
@@ -1135,17 +1211,15 @@
     if (confirm("¿Estás seguro de que querés borrar esta entrada permanentemente?")) {
       entradas = entradas.filter(e => e.id !== id);
       guardarEntradasEnStorage();
-      if (entradaActualId === id) {
-        entradaActualId = null;
-        actualizarVistaEntrada();
-      }
+      if (entradaActualId === id) { entradaActualId = null; actualizarVistaEntrada(); }
       renderHistorial();
-      showToast("🗑️ Entrada eliminada");
+      showToast("️ Entrada eliminada");
     }
   };
 
   filtroBusqueda.addEventListener('input', renderHistorial);
   filtroCategoria.addEventListener('change', renderHistorial);
+  filtroOrden.addEventListener('change', renderHistorial);
   document.getElementById('historialClose').addEventListener('click', () => modalHistorial.classList.remove('show'));
   modalHistorial.addEventListener('click', (e) => { if (e.target === modalHistorial) modalHistorial.classList.remove('show'); });
 
