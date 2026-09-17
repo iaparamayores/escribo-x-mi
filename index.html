@@ -104,11 +104,11 @@
   .btn-wrapper { flex: 1; display: flex; justify-content: center; }
   .btn-wrapper.mic { flex: 0 0 64px; }
   .btn-side {
-    width: 100%; padding: 12px 8px; font-size: 0.85rem; border: none;
+    width: 100%; padding: 14px 8px; font-size: 0.95rem; border: none;
     border-radius: 12px; cursor: pointer; font-weight: 600; background: #ffffff;
     color: #2c3e50; box-shadow: 0 2px 4px rgba(0,0,0,0.06);
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: transform 0.1s; white-space: nowrap; min-height: 50px;
+    transition: transform 0.1s; white-space: nowrap; min-height: 54px;
   }
   body.modo-oscuro .btn-side { background: #2d2d2d; color: #e5e5e5; }
   .btn-side:active { transform: scale(0.95); }
@@ -229,8 +229,8 @@
   
   .ajuste-opcion, .herramienta-btn {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 12px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
-    cursor: pointer; border: none; width: 100%; text-align: left; font-size: 1rem; font-weight: 600; color: #2c3e50;
+    padding: 14px; background: #f8f9fa; border-radius: 8px; margin-bottom: 8px;
+    cursor: pointer; border: none; width: 100%; text-align: left; font-size: 1.05rem; font-weight: 600; color: #2c3e50;
   }
   .herramienta-btn { justify-content: center; gap: 10px; font-size: 1.1rem; }
   body.modo-oscuro .ajuste-opcion, body.modo-oscuro .herramienta-btn { background: #1a1a1a; color: #e5e5e5; }
@@ -276,7 +276,6 @@
     margin-top: 4px;
   }
 
-  /* Pestañas para el historial */
   .tabs-historial { display: flex; gap: 8px; margin-bottom: 12px; }
   .tab-historial {
     flex: 1; padding: 10px; background: #e5e7eb; border: none; border-radius: 8px;
@@ -301,7 +300,7 @@
     <div class="dialog-text-container" id="dialogTextContainer">
       <p class="dialog-text texto-normal" id="dialogText">Presioná el micrófono y empezá a dictar...</p>
     </div>
-    <p class="dialog-meta" id="dialogMeta"> Categoría: Sin categoría | 📝 Nuevo</p>
+    <p class="dialog-meta" id="dialogMeta">📂 Categoría: Sin categoría | 📝 Nuevo</p>
   </div>
 
   <div class="controls">
@@ -321,10 +320,7 @@
     </div>
     <div class="controls-row">
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnCorregir">✏️ Corregir</button>
-      </div>
-      <div class="btn-wrapper">
-        <button class="btn-side" id="btnPDF">📄 PDF</button>
+        <button class="btn-side" id="btnCorregir">️ Corregir</button>
       </div>
       <div class="btn-wrapper">
         <button class="btn-side" id="btnLeer">🔊 Leer</button>
@@ -383,6 +379,7 @@
   <div class="modal">
     <h3>🛠️ Herramientas</h3>
     <button class="herramienta-btn" onclick="compartirTexto()">📤 Compartir esta entrada</button>
+    <button class="herramienta-btn" onclick="exportarAPDF()"> Exportar a PDF</button>
     <button class="herramienta-btn" onclick="archivarEntradaActual()">📦 Archivar entrada actual</button>
     <button class="herramienta-btn" onclick="descargarBackup()">💾 Descargar Backup</button>
     <button class="herramienta-btn" onclick="document.getElementById('inputRestaurar').click()">📥 Restaurar Backup</button>
@@ -394,9 +391,9 @@
 <!-- MODAL CATEGORÍA -->
 <div class="modal-overlay" id="modalCategoria">
   <div class="modal">
-    <h3>📂 Elegir Categoría</h3>
+    <h3> Elegir Categoría</h3>
     <div id="listaCategoriasElegir" style="display: flex; flex-direction: column; gap: 8px;"></div>
-    <h4>⚙️ Gestionar categorías</h4>
+    <h4>️ Gestionar categorías</h4>
     <div id="listaCategoriasGestionar" style="display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto;"></div>
     <div class="nueva-cat-form">
       <input type="text" id="nuevaCatInput" placeholder="Nombre de nueva categoría...">
@@ -409,7 +406,7 @@
 <!-- MODAL AJUSTES -->
 <div class="modal-overlay" id="modalAjustes">
   <div class="modal">
-    <h3>️ Ajustes</h3>
+    <h3>⚙️ Ajustes</h3>
     <div class="ajuste-opcion">
       <label>🔤 Tamaño de texto</label>
       <select id="ajusteTamano">
@@ -419,7 +416,7 @@
       </select>
     </div>
     <div class="ajuste-opcion">
-      <label>🌙 Modo oscuro</label>
+      <label> Modo oscuro</label>
       <select id="ajusteModoOscuro">
         <option value="0" selected>Desactivado</option>
         <option value="1">Activado</option>
@@ -441,7 +438,7 @@
       </select>
     </div>
     <div class="ajuste-opcion">
-      <label> Velocidad de lectura</label>
+      <label>🐢 Velocidad de lectura</label>
       <select id="ajusteVelocidad">
         <option value="0.6">Muy lenta</option>
         <option value="0.75" selected>Normal lenta</option>
@@ -462,9 +459,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ==========================================
-  // CATEGORÍAS PERSONALIZABLES
-  // ==========================================
   const CATEGORIAS_POR_DEFECTO = [
     { nombre: "Recuerdos", visible: true },
     { nombre: "Cartas", visible: true },
@@ -484,15 +478,11 @@
   function getCategoriasVisibles() { return categorias.filter(c => c.visible); }
   function obtenerNombresCategorias() { return categorias.map(c => c.nombre); }
 
-  // ==========================================
-  // ESTADO (DICTADO PRO)
-  // ==========================================
   let entradas = JSON.parse(localStorage.getItem('escribo_x_mi_entradas') || '[]');
-  // Migración simple para entradas viejas que no tienen 'archivada'
   entradas.forEach(e => { if (e.archivada === undefined) e.archivada = false; });
   
   let entradaActualId = null;
-  let tabHistorialActual = 'activas'; // 'activas' o 'archivadas'
+  let tabHistorialActual = 'activas';
   
   let isRecording = false;
   let dictando = false;
@@ -517,7 +507,6 @@
   let TIEMPO_MINIMO_ESCUCHA = parseInt(ajustes.tiempo) || 5000;
   let audioCtx = null;
 
-  // ELEMENTOS DEL DOM
   const dialogText = document.getElementById('dialogText');
   const dialogTextContainer = document.getElementById('dialogTextContainer');
   const dialogMeta = document.getElementById('dialogMeta');
@@ -526,7 +515,6 @@
   const btnBorrar = document.getElementById('btnBorrar');
   const btnCategoria = document.getElementById('btnCategoria');
   const btnCorregir = document.getElementById('btnCorregir');
-  const btnPDF = document.getElementById('btnPDF');
   const btnLeer = document.getElementById('btnLeer');
   const btnCopiar = document.getElementById('btnCopiar');
   const btnHerramientas = document.getElementById('btnHerramientas');
@@ -551,9 +539,6 @@
   const filtroOrden = document.getElementById('filtroOrden');
   const toast = document.getElementById('toast');
 
-  // ==========================================
-  // VOCES
-  // ==========================================
   function cargarVoces() { if ('speechSynthesis' in window) { vocesDisponibles = window.speechSynthesis.getVoices(); } }
   if ('speechSynthesis' in window) { cargarVoces(); window.speechSynthesis.onvoiceschanged = cargarVoces; }
 
@@ -571,9 +556,6 @@
     return voz;
   }
 
-  // ==========================================
-  // FUNCIONES DE ENTRADAS
-  // ==========================================
   function guardarEntradasEnStorage() { localStorage.setItem('escribo_x_mi_entradas', JSON.stringify(entradas)); }
 
   function generarTituloDesdeContenido(contenido) {
@@ -638,9 +620,6 @@
     }
   }
 
-  // ==========================================
-  // MOTOR DE DICTADO PRO
-  // ==========================================
   function unirTexto(base, nuevo) {
     if (!base) return nuevo;
     if (!nuevo) return base;
@@ -744,8 +723,8 @@
 
     recognitionInstance.onerror = (event) => {
       if (event.error === 'no-speech') return;
-      if (event.error === 'not-allowed') { showToast('️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
-      if (event.error === 'network') { showToast('️ El dictado requiere conexión'); detenerDictadoPro(); }
+      if (event.error === 'not-allowed') { showToast('⚠️ Necesitás habilitar el micrófono'); detenerDictadoPro(); return; }
+      if (event.error === 'network') { showToast('⚠️ El dictado requiere conexión'); detenerDictadoPro(); }
     };
 
     recognitionInstance.onend = () => {
@@ -759,7 +738,7 @@
           }
         }, 250);
       } else if (pausado) {
-        dialogMeta.innerHTML = '<span class="estado-dictado">️ En pausa. Tocá "Reanudar" para seguir.</span>';
+        dialogMeta.innerHTML = '<span class="estado-dictado">⏸️ En pausa. Tocá "Reanudar" para seguir.</span>';
       }
     };
 
@@ -794,13 +773,10 @@
     actualizarVistaEntrada();
   }
 
-  // ==========================================
-  // EXPORTAR PDF
-  // ==========================================
   function exportarAPDF() {
     const entrada = entradas.find(e => e.id === entradaActualId);
     if (!entrada || !entrada.contenido.trim() || entrada.contenido.includes("Presioná el micrófono")) {
-      showToast("️ No hay texto para exportar"); return;
+      showToast("⚠️ No hay texto para exportar"); return;
     }
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -817,12 +793,10 @@
     doc.text("Generado con Escribo x mi", 20, 280);
     const nombreArchivo = `${entrada.titulo.replace(/[^a-z0-9]/gi, '_')}.pdf`;
     doc.save(nombreArchivo);
-    showToast(" PDF generado y descargado");
+    showToast("📄 PDF generado y descargado");
+    document.getElementById('modalHerramientas').classList.remove('show');
   }
 
-  // ==========================================
-  // UTILIDADES Y HERRAMIENTAS
-  // ==========================================
   function scrollAlFinal() { setTimeout(() => { dialogTextContainer.scrollTop = dialogTextContainer.scrollHeight; }, 50); }
   function showToast(msg) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   
@@ -867,7 +841,7 @@
     if (voz) { utterance.voice = voz; utterance.lang = voz.lang; } else { utterance.lang = 'es-AR'; }
     
     const resetearBoton = () => { btnLeer.textContent = '🔊 Leer'; btnLeer.style.background = ''; };
-    utterance.onstart = () => { btnLeer.textContent = ' Leyendo...'; btnLeer.style.background = '#8e44ad'; };
+    utterance.onstart = () => { btnLeer.textContent = '🔊 Leyendo...'; btnLeer.style.background = '#8e44ad'; };
     utterance.onend = () => { resetearBoton(); };
     utterance.onerror = () => { resetearBoton(); showToast('⚠️ Error al leer'); };
     
@@ -886,11 +860,10 @@
     else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
     if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para copiar'); return; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(texto).then(() => { showToast('📋 Texto copiado'); }).catch(() => { showToast('⚠️ Error al copiar'); });
+      navigator.clipboard.writeText(texto).then(() => { showToast('📋 Texto copiado'); }).catch(() => { showToast('️ Error al copiar'); });
     } else { showToast('⚠️ Tu navegador no soporta copiar'); }
   }
 
-  // NUEVAS HERRAMIENTAS
   function compartirTexto() {
     let texto;
     if (isEditing) { texto = dialogText.textContent; } 
@@ -914,7 +887,7 @@
       entrada.fechaModificacion = new Date().toISOString();
       guardarEntradasEnStorage();
       actualizarVistaEntrada();
-      showToast(entrada.archivada ? "📦 Entrada archivada" : "📤 Entrada desarquivada");
+      showToast(entrada.archivada ? " Entrada archivada" : "📤 Entrada desarquivada");
     }
     document.getElementById('modalHerramientas').classList.remove('show');
   }
@@ -966,18 +939,15 @@
     reader.readAsText(file);
   }
 
-  // ==========================================
-  // GESTIÓN DE CATEGORÍAS
-  // ==========================================
   function renderModalCategoria() {
     const visibles = getCategoriasVisibles();
     listaCategoriasElegir.innerHTML = visibles.map(cat => 
-      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')">🔵 ${cat.nombre}</button>`
+      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')"> ${cat.nombre}</button>`
     ).join('') || '<p style="color:#95a5a6; text-align:center; padding:12px;">No hay categorías visibles</p>';
 
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
       `<div class="cat-item ${cat.visible ? '' : 'oculta'}">
-        <span class="cat-item-nombre">${cat.visible ? '' : '🚫'} ${cat.nombre}</span>
+        <span class="cat-item-nombre">${cat.visible ? '🔵' : '🚫'} ${cat.nombre}</span>
         <div class="cat-item-acciones">
           <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
           <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
@@ -1016,7 +986,7 @@
   window.toggleOcultarCategoria = (idx) => {
     categorias[idx].visible = !categorias[idx].visible;
     guardarCategorias(); renderModalCategoria();
-    showToast(categorias[idx].visible ? `👁️ Visible: ${categorias[idx].nombre}` : ` Oculta: ${categorias[idx].nombre}`);
+    showToast(categorias[idx].visible ? `️ Visible: ${categorias[idx].nombre}` : `🚫 Oculta: ${categorias[idx].nombre}`);
   };
 
   window.eliminarCategoria = (idx) => {
@@ -1024,7 +994,7 @@
     if (confirm(`¿Eliminar "${cat.nombre}"? Las entradas pasarán a "Sin categoría".`)) {
       entradas.forEach(e => { if (e.categoria === cat.nombre) { e.categoria = "Sin categoría"; e.fechaModificacion = new Date().toISOString(); } });
       categorias.splice(idx, 1); guardarCategorias(); guardarEntradasEnStorage(); renderModalCategoria(); actualizarVistaEntrada();
-      showToast(`️ Eliminada: ${cat.nombre}`);
+      showToast(`🗑️ Eliminada: ${cat.nombre}`);
     }
   };
 
@@ -1037,9 +1007,6 @@
     showToast(`✅ Agregada: ${nombre}`);
   });
 
-  // ==========================================
-  // EVENT LISTENERS
-  // ==========================================
   btnMic.addEventListener('click', activarMicrofono);
   
   btnPausar.addEventListener('click', () => {
@@ -1115,7 +1082,6 @@
   });
 
   btnListoEdicion.addEventListener('click', () => btnCorregir.click());
-  btnPDF.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); exportarAPDF(); });
   btnLeer.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); leerEnVozAlta(); });
   btnCopiar.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); copiarAlPortapapeles(); });
   btnHerramientas.addEventListener('click', () => { if (isRecording) detenerDictadoPro(); modalHerramientas.classList.add('show'); });
@@ -1153,7 +1119,6 @@
   });
   modalAjustes.addEventListener('click', (e) => { if (e.target === modalAjustes) modalAjustes.classList.remove('show'); });
 
-  // Lógica del Historial
   window.cambiarTabHistorial = (tab) => {
     tabHistorialActual = tab;
     document.getElementById('tabActivas').classList.toggle('activa', tab === 'activas');
@@ -1181,7 +1146,6 @@
       return coincideTab && coincideBusqueda && coincideCat;
     });
 
-    // Ordenamiento
     if (orden === 'recentes') {
       filtradas.sort((a, b) => new Date(b.fechaModificacion) - new Date(a.fechaModificacion));
     } else if (orden === 'antiguas') {
@@ -1213,7 +1177,7 @@
       guardarEntradasEnStorage();
       if (entradaActualId === id) { entradaActualId = null; actualizarVistaEntrada(); }
       renderHistorial();
-      showToast("️ Entrada eliminada");
+      showToast("🗑️ Entrada eliminada");
     }
   };
 
