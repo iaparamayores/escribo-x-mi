@@ -11,6 +11,7 @@
 <link rel="icon" type="image/png" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-512.png">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -1218,6 +1219,90 @@
   }
   aplicarAjustes();
   actualizarVistaEntrada();
+// ===== NUBE ESCRIBO X MI (respaldo automático) =====
+const SUPA_URL='https://vqezdcdalprvjdtdrqzx.supabase.co';
+const SUPA_KEY='sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
+let supa=null, uid=null, nubeOK=false, nubeModo='off', nubeCambio=false;
+const _lsSet=localStorage.setItem.bind(localStorage);
+function nubeToast(msg){ let t=document.getElementById('nube-toast'); if(!t){ t=document.createElement('div'); t.id='nube-toast'; document.body.appendChild(t);} t.textContent=msg; t.classList.add('ver'); setTimeout(()=>t.classList.remove('ver'),3500); }
+(function(){ const st=document.createElement('style'); st.textContent='#nube{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube.tocable{cursor:pointer;text-decoration:underline;} #nube-form{display:none;text-align:center;margin:.4rem 0;} #nube-toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast.ver{opacity:1;}'; document.head.appendChild(st); })();
+const nubeEl=document.createElement('p'); nubeEl.id='nube';
+const nubeForm=document.createElement('div'); nubeForm.id='nube-form';
+nubeForm.innerHTML='<input id="nube-mail" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"> <button id="nube-ok" style="margin-left:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Mandar link</button>';
+const ancla=document.querySelector('.controls');
+if(ancla&&ancla.parentNode){ ancla.parentNode.insertBefore(nubeEl, ancla); ancla.parentNode.insertBefore(nubeForm, ancla); }
+function nubeEstado(txt,tocable){ nubeEl.textContent=txt; if(tocable){nubeEl.classList.add('tocable');}else{nubeEl.classList.remove('tocable');} }
+try{ if(window.supabase&&window.supabase.createClient){ supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true}}); } }catch(e){}
+function tomarSnapshot(){ const d={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('sb-')!==0&&k!=='nube_local_ts') d[k]=localStorage.getItem(k); } return d; }
+function clavesApp(d){ let n=0; for(const k in d){ n++; } return n; }
+function programarSubida(){ clearTimeout(window.__nubeT); window.__nubeT=setTimeout(()=>{ if(nubeCambio&&nubeOK){ nubeCambio=false; nubeSubir(true); } },6000); }
+localStorage.setItem=function(k,v){ _lsSet(k,v); if(k!=='nube_local_ts'&&k.indexOf('sb-')!==0){ nubeCambio=true; programarSubida(); } };
+async function nubeSubir(silencioso){
+  if(!nubeOK||!uid) return;
+  try{
+    await supa.from('respaldos_escribo').upsert({ user_id: uid, datos: tomarSnapshot(), actualizado_en: new Date().toISOString() });
+    _lsSet('nube_local_ts', String(Date.now()));
+    if(!silencioso) nubeToast('☁️ Respaldo guardado en la nube');
+  }catch(e){ console.log('[nube] subir falló', e); }
+}
+function aplicarRespaldo(datos, tNube){ for(const k in datos){ if(k.indexOf('sb-')===0) continue; _lsSet(k, datos[k]); } _lsSet('nube_local_ts', String(tNube)); }
+async function nubeTraerYDecidir(){
+  if(!nubeOK||!uid) return;
+  try{
+    const { data } = await supa.from('respaldos_escribo').select('datos, actualizado_en').eq('user_id', uid).limit(1);
+    if(!data||!data.length){ nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos'); await nubeSubir(true); return; }
+    const tNube=new Date(data[0].actualizado_en).getTime();
+    const tLocal=parseInt(localStorage.getItem('nube_local_ts')||'0',10)||0;
+    if(clavesApp(tomarSnapshot())===0){
+      aplicarRespaldo(data[0].datos, tNube);
+      nubeToast('☁️ Tus escritos volvieron de la nube');
+      setTimeout(()=>location.reload(), 1500);
+      return;
+    }
+    if(tNube>tLocal+2000){
+      nubeModo='restaurar';
+      window.__nubeDatos=data[0].datos; window.__nubeTs=tNube;
+      nubeEstado('☁️ Hay un respaldo más nuevo en la nube — tocá para traerlo', true);
+    } else {
+      nubeModo='ok';
+      nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos');
+    }
+  }catch(e){ nubeEstado('☁️ Nube conectada (sin respaldo aún)'); }
+}
+async function nubeConectar(){
+  if(!supa){ nubeEstado('⚠️ Sin nube: todo queda en este celu'); return; }
+  try{
+    const { data: ses } = await supa.auth.getSession();
+    if(ses&&ses.session){ uid=ses.session.user.id; nubeOK=true; await nubeTraerYDecidir(); }
+    else { uid=null; nubeOK=false; nubeModo='off'; nubeEstado('☁️ Nube apagada — tocá acá para activarla', true); }
+  }catch(e){ nubeOK=false; nubeEstado('⚠️ Sin nube: todo queda en este celu'); }
+}
+nubeEl.addEventListener('click', ()=>{
+  if(nubeModo==='restaurar'){
+    if(confirm('¿Traer el respaldo más nuevo desde la nube? Se reemplaza lo de este celu.')){
+      aplicarRespaldo(window.__nubeDatos, window.__nubeTs);
+      nubeToast('☁️ Respaldo restaurado');
+      setTimeout(()=>location.reload(), 1500);
+    }
+    return;
+  }
+  if(nubeOK){ nubeToast('☁️ La nube ya está conectada'); return; }
+  if(!supa){ nubeToast('Nube no disponible en este navegador'); return; }
+  nubeForm.style.display=(nubeForm.style.display==='none')?'block':'none';
+});
+document.getElementById('nube-ok').addEventListener('click', async ()=>{
+  const mail=(document.getElementById('nube-mail').value||'').trim();
+  if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
+  try{
+    const { error } = await supa.auth.signInWithOtp({ email: mail, options:{ emailRedirectTo: window.location.href } });
+    if(error) throw error;
+    nubeToast('📬 Revisá ese correo y tocá el link mágico');
+    nubeForm.style.display='none';
+  }catch(e){ nubeToast('No se pudo enviar el link'); }
+});
+if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
+window.addEventListener('online', ()=>{ nubeConectar(); });
+nubeConectar();
 </script>
 
 </body>
