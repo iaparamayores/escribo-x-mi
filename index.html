@@ -1269,6 +1269,21 @@ async function nubeTraerYDecidir(){
     }
   }catch(e){ nubeEstado('☁️ Nube conectada (sin respaldo aún)'); }
 }
+async function nubeRescatarToken(){
+  if(!supa) return;
+  try{
+    const h=window.location.hash||'';
+    if(h.includes('access_token=')){
+      const p=new URLSearchParams(h.substring(1));
+      const at=p.get('access_token'); const rt=p.get('refresh_token');
+      if(at){ await supa.auth.setSession({ access_token: at, refresh_token: rt||at }); }
+    }
+    const q=new URLSearchParams(window.location.search);
+    const code=q.get('code');
+    if(code){ await supa.auth.exchangeCodeForSession(code); }
+    if(h.includes('access_token=')||code){ history.replaceState(null,'',window.location.pathname); }
+  }catch(e){ console.log('[nube] rescate', e); }
+}
 async function nubeConectar(){
   if(!supa){ nubeEstado('⚠️ Sin nube: todo queda en este celu'); return; }
   try{
@@ -1302,7 +1317,7 @@ document.getElementById('nube-ok').addEventListener('click', async ()=>{
 });
 if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
 window.addEventListener('online', ()=>{ nubeConectar(); });
-nubeConectar();
+nubeRescatarToken().then(()=>{ nubeConectar(); setTimeout(()=>nubeConectar(),2500); setTimeout(()=>nubeConectar(),7000); });
 </script>
 
 </body>
