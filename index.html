@@ -1298,7 +1298,7 @@ document.getElementById('nube-ok').addEventListener('click', async ()=>{
     if(error) throw error;
     nubeToast('📬 Revisá ese correo y tocá el link mágico');
     nubeForm.style.display='none';
-  }catch(e){ nubeToast('No se pudo enviar el link'); }
+}catch(e){ nubeToast('⚠️ '+(e&&e.message?e.message:'Error desconocido')); }
 });
 if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
 window.addEventListener('online', ()=>{ nubeConectar(); });
