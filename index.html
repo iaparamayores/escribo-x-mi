@@ -1228,7 +1228,7 @@ function nubeToast(msg){ let t=document.getElementById('nube-toast'); if(!t){ t=
 (function(){ const st=document.createElement('style'); st.textContent='#nube{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube.tocable{cursor:pointer;text-decoration:underline;} #nube-form{display:none;text-align:center;margin:.4rem 0;} #nube-toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast.ver{opacity:1;}'; document.head.appendChild(st); })();
 const nubeEl=document.createElement('p'); nubeEl.id='nube';
 const nubeForm=document.createElement('div'); nubeForm.id='nube-form';
-nubeForm.innerHTML='<input id="nube-mail" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"> <button id="nube-ok" style="margin-left:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Mandar link</button>';
+nubeForm.innerHTML='<input id="nube-mail" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"> <button id="nube-ok" style="margin-left:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button>';
 const ancla=document.querySelector('.controls');
 if(ancla&&ancla.parentNode){ ancla.parentNode.insertBefore(nubeEl, ancla); ancla.parentNode.insertBefore(nubeForm, ancla); }
 function nubeEstado(txt,tocable){ nubeEl.textContent=txt; if(tocable){nubeEl.classList.add('tocable');}else{nubeEl.classList.remove('tocable');} }
@@ -1307,13 +1307,16 @@ nubeEl.addEventListener('click', ()=>{
 });
 document.getElementById('nube-ok').addEventListener('click', async ()=>{
   const mail=(document.getElementById('nube-mail').value||'').trim();
+  const pass=(document.getElementById('nube-pass').value||'');
   if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
+  if(!pass){ nubeToast('Escribí tu contraseña'); return; }
   try{
-    const { error } = await supa.auth.signInWithOtp({ email: mail, options:{ emailRedirectTo: window.location.href } });
+    const { error } = await supa.auth.signInWithPassword({ email: mail, password: pass });
     if(error) throw error;
-    nubeToast('📬 Revisá ese correo y tocá el link mágico');
+    nubeToast('☁️ Conectado a la nube');
     nubeForm.style.display='none';
-}catch(e){ nubeToast('⚠️ '+(e&&e.message?e.message:'Error desconocido')); }
+    await nubeTraerYDecidir();
+  }catch(e){ nubeToast('⚠️ '+(e&&e.message?e.message:'No se pudo entrar')); }
 });
 if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
 window.addEventListener('online', ()=>{ nubeConectar(); });
