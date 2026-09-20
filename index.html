@@ -630,6 +630,42 @@
     const separador = /[\s.,;:!?¿¡]$/.test(base) ? "" : " ";
     return base + separador + nuevo;
   }
+  function normalizarFechas(texto) {
+    // Diccionario de números a dígitos
+    const numeros = {
+      'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5, 'seis': 6,
+      'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10, 'once': 11, 'doce': 12,
+      'trece': 13, 'catorce': 14, 'quince': 15, 'dieciseis': 16, 'dieciséis': 16, 
+      'diecisiete': 17, 'dieciocho': 18, 'diecinueve': 19, 'veinte': 20, 
+      'veintiuno': 21, 'veintidos': 22, 'veintidós': 22, 'veintitres': 23, 'veintitrés': 23, 
+      'veinticuatro': 24, 'veinticinco': 25, 'veintiseis': 26, 'veintiséis': 26, 
+      'veintisiete': 27, 'veintiocho': 28, 'veintinueve': 29, 'treinta': 30, 'treinta y uno': 31
+    };
+    
+    // Diccionario de meses a dígitos
+    const meses = {
+      'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4, 'mayo': 5, 'junio': 6,
+      'julio': 7, 'agosto': 8, 'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
+    };
+
+    // Combina ambos para aceptar "20 de nueve" o "20 de septiembre"
+    const mesesYNumeros = { ...meses, ...numeros };
+
+    // Patrón: (número o palabra) + (de / del) + (mes o número)
+    // Ejemplos que atrapa: "veinte de nueve", "20 del 9", "dos de octubre", "treinta y uno de diciembre"
+    const regexFecha = /\b(\d{1,2}|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|dieciséis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintidós|veintitres|veintitrés|veinticuatro|veinticinco|veintiseis|veintiséis|veintisiete|veintiocho|veintinueve|treinta|treinta y uno)\s+(?:de|del)\s+(\d{1,2}|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/gi;
+
+    return texto.replace(regexFecha, (match, dia, mes) => {
+      // Normalizamos a minúsculas y quitamos tildes para la búsqueda
+      const diaLimpio = dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const mesLimpio = mes.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      
+      const d = numeros[diaLimpio] || dia;
+      const m = mesesYNumeros[mesLimpio] || mes;
+      
+      return `${d}/${m}`;
+    });
+  }
 
   function renderizarDictado() {
     if (textoProvisional) {
@@ -710,13 +746,19 @@
       textoProvisional = "";
       for (let i = event.resultIndex; i < event.results.length; i++) {
         const resultado = event.results[i];
-        const texto = resultado[0].transcript.trim();
+        let texto = resultado[0].transcript.trim();
         if (!texto) continue;
 
         if (resultado.isFinal) {
+          // AQUÍ ESTÁ LA MAGIA: limpiamos el formato de fechas
+          texto = normalizarFechas(texto);
+          
           const comando = esComandoExacto(texto.toLowerCase());
-          if (comando) { ejecutarComando(comando); } 
-          else { textoConfirmado = unirTexto(textoConfirmado, texto); }
+          if (comando) { 
+            ejecutarComando(comando); 
+          } else { 
+            textoConfirmado = unirTexto(textoConfirmado, texto); 
+          }
           textoProvisional = "";
         } else {
           textoProvisional = unirTexto(textoProvisional, texto);
