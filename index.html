@@ -641,6 +641,38 @@
       'veinticuatro': 24, 'veinticinco': 25, 'veintiseis': 26, 'veintiséis': 26, 
       'veintisiete': 27, 'veintiocho': 28, 'veintinueve': 29, 'treinta': 30, 'treinta y uno': 31
     };
+    function corregirErroresComunes(texto) {
+    // Lista de errores típicos del dictado por voz y su corrección
+    const errores = {
+      'echo': 'hecho',
+      'halla': 'haya',
+      'valla': 'vaya',
+      'baya': 'vaya',
+      'aya': 'haya',
+      'halla': 'haya',
+      'híbrido': 'híbrido', // A veces el voz lo escribe raro
+      'haber si': 'a ver si',
+      'vamos haber': 'vamos a ver',
+      'haz de cuenta': 'has de cuenta',
+      'hazlo': 'haslo',
+      'ves': 'vez' // "una ves" -> "una vez"
+    };
+
+    // Recorremos los errores y los reemplazamos solo si están en minúsculas (para no romper nombres propios)
+    for (const [error, correccion] of Object.entries(errores)) {
+      // Usamos una expresión regular para buscar la palabra exacta (no parte de otra)
+      const regex = new RegExp(`\\b${error}\\b`, 'gi');
+      
+      // Reemplazo inteligente: si la palabra original empezaba con mayúscula, la corrección también
+      texto = texto.replace(regex, (match) => {
+        if (match[0] === match[0].toUpperCase()) {
+          return correccion.charAt(0).toUpperCase() + correccion.slice(1);
+        }
+        return correccion;
+      });
+    }
+    return texto;
+  }
     
     // Diccionario de meses a dígitos
     const meses = {
@@ -750,8 +782,10 @@
         if (!texto) continue;
 
         if (resultado.isFinal) {
-          // AQUÍ ESTÁ LA MAGIA: limpiamos el formato de fechas
+          // 1. Limpiamos fechas
           texto = normalizarFechas(texto);
+          // 2. Aplicamos el parche de errores comunes de voz
+          texto = corregirErroresComunes(texto);
           
           const comando = esComandoExacto(texto.toLowerCase());
           if (comando) { 
@@ -1109,14 +1143,19 @@
   btnCorregir.addEventListener('click', () => {
     if (isRecording) detenerDictadoPro();
     isEditing = !isEditing;
+    
+    // Activamos la edición y el corrector nativo del celular/navegador
     dialogText.contentEditable = isEditing;
+    dialogText.spellcheck = isEditing; // <--- ESTA LÍNEA ES LA CLAVE
+    
     editBadge.classList.toggle('show', isEditing);
     btnListoEdicion.classList.toggle('show', isEditing);
+    
     if (isEditing) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) dialogText.textContent = entrada.contenido || "";
       dialogText.focus();
-      showToast('✏️ Modo edición activado');
+      showToast('✏️ Modo edición activado. Las palabras con errores se subrayarán en rojo.');
     } else {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) { 
