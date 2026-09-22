@@ -311,7 +311,7 @@
         <button class="btn-side" id="btnHistorial">📋 Historial</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnBorrar">️ Borrar</button>
+        <button class="btn-side" id="btnBorrar">🗑️ Borrar</button>
       </div>
       <div class="btn-wrapper mic">
         <button class="btn-mic" id="btnMic">🎤</button>
@@ -331,7 +331,7 @@
         <button class="btn-side" id="btnCopiar">📋 Copiar</button>
       </div>
       <div class="btn-wrapper">
-        <button class="btn-side" id="btnHerramientas">️ Herram.</button>
+        <button class="btn-side" id="btnHerramientas">🛠️ Herram.</button>
       </div>
     </div>
   </div>
@@ -339,11 +339,11 @@
   <div class="ad-slider">
     <div class="ad-slides" id="adSlides">
       <div class="ad-slide">📢 Escribo x mi: Tu historia, tus palabras.</div>
-      <div class="ad-slide">️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
+      <div class="ad-slide">🎙️ Dictá, escribí y guardá tus recuerdos para siempre.</div>
       <div class="ad-slide">⭐ Hecho con cariño para dejar una huella.</div>
       <div class="ad-slide">☁️ Servicio de nube: tus escritos nunca se pierden. Pedilo a iaparamayores@gmail.com</div>
     </div>
-<div class="ad-dots" id="adDots">
+    <div class="ad-dots" id="adDots">
       <div class="ad-dot active"></div>
       <div class="ad-dot"></div>
       <div class="ad-dot"></div>
@@ -363,7 +363,7 @@
       <button class="tab-historial" id="tabArchivadas" onclick="cambiarTabHistorial('archivadas')">Archivadas</button>
     </div>
     <div class="filtro-container">
-      <input type="text" id="filtroBusqueda" placeholder="🔍 Buscar por título...">
+      <input type="text" id="filtroBusqueda" placeholder=" Buscar por título...">
       <select id="filtroCategoria">
         <option value="Todas">Todas las categorías</option>
       </select>
@@ -381,9 +381,9 @@
 <!-- MODAL HERRAMIENTAS -->
 <div class="modal-overlay" id="modalHerramientas">
   <div class="modal">
-    <h3>️ Herramientas</h3>
+    <h3>🛠️ Herramientas</h3>
     <button class="herramienta-btn" onclick="compartirTexto()">📤 Compartir esta entrada</button>
-    <button class="herramienta-btn" onclick="exportarAPDF()">📄 Exportar a PDF</button>
+    <button class="herramienta-btn" onclick="exportarAPDF()"> Exportar a PDF</button>
     <button class="herramienta-btn" onclick="abrirModalCategoria()">📂 Cambiar categoría</button>
     <button class="herramienta-btn" onclick="archivarEntradaActual()">📦 Archivar entrada actual</button>
     <button class="herramienta-btn" onclick="descargarBackup()">💾 Descargar Backup</button>
@@ -421,7 +421,7 @@
       </select>
     </div>
     <div class="ajuste-opcion">
-      <label> Modo oscuro</label>
+      <label>🌙 Modo oscuro</label>
       <select id="ajusteModoOscuro">
         <option value="0" selected>Desactivado</option>
         <option value="1">Activado</option>
@@ -590,11 +590,11 @@
       dialogText.textContent = entrada.contenido || "";
       const fecha = new Date(entrada.fechaModificacion).toLocaleDateString('es-AR');
       let estado = entrada.archivada ? " (Archivada)" : "";
-      dialogMeta.textContent = `📂 Categoría: ${entrada.categoria}${estado} | 📝 Modificado: ${fecha}`;
+      dialogMeta.textContent = `📂 Categoría: ${entrada.categoria}${estado} |  Modificado: ${fecha}`;
       if (dialogText.textContent === "") { dialogText.textContent = "Presioná el micrófono y empezá a dictar..."; }
     } else {
       dialogText.textContent = "Presioná el micrófono y empezá a dictar...";
-      dialogMeta.textContent = "📂 Categoría: Sin categoría | 📝 Nuevo";
+      dialogMeta.textContent = "📂 Categoría: Sin categoría |  Nuevo";
     }
     scrollAlFinal();
   }
@@ -620,7 +620,7 @@
       showToast(`📝 Creado: ${tituloFinal}`);
     } else {
       cargarEntrada(encontrada.id);
-      showToast(`📂 Abierto: ${encontrada.titulo}`);
+      showToast(` Abierto: ${encontrada.titulo}`);
     }
   }
 
@@ -630,8 +630,8 @@
     const separador = /[\s.,;:!?¿¡]$/.test(base) ? "" : " ";
     return base + separador + nuevo;
   }
+
   function normalizarFechas(texto) {
-    // Diccionario de números a dígitos
     const numeros = {
       'uno': 1, 'dos': 2, 'tres': 3, 'cuatro': 4, 'cinco': 5, 'seis': 6,
       'siete': 7, 'ocho': 8, 'nueve': 9, 'diez': 10, 'once': 11, 'doce': 12,
@@ -641,62 +641,50 @@
       'veinticuatro': 24, 'veinticinco': 25, 'veintiseis': 26, 'veintiséis': 26, 
       'veintisiete': 27, 'veintiocho': 28, 'veintinueve': 29, 'treinta': 30, 'treinta y uno': 31
     };
-    function corregirErroresComunes(texto) {
-    // Lista de errores típicos del dictado por voz y su corrección
-    const errores = {
-      'echo': 'hecho',
-      'halla': 'haya',
-      'valla': 'vaya',
-      'baya': 'vaya',
-      'aya': 'haya',
-      'halla': 'haya',
-      'híbrido': 'híbrido', // A veces el voz lo escribe raro
-      'haber si': 'a ver si',
-      'vamos haber': 'vamos a ver',
-      'haz de cuenta': 'has de cuenta',
-      'hazlo': 'haslo',
-      'ves': 'vez' // "una ves" -> "una vez"
-    };
-
-    // Recorremos los errores y los reemplazamos solo si están en minúsculas (para no romper nombres propios)
-    for (const [error, correccion] of Object.entries(errores)) {
-      // Usamos una expresión regular para buscar la palabra exacta (no parte de otra)
-      const regex = new RegExp(`\\b${error}\\b`, 'gi');
-      
-      // Reemplazo inteligente: si la palabra original empezaba con mayúscula, la corrección también
-      texto = texto.replace(regex, (match) => {
-        if (match[0] === match[0].toUpperCase()) {
-          return correccion.charAt(0).toUpperCase() + correccion.slice(1);
-        }
-        return correccion;
-      });
-    }
-    return texto;
-  }
-    
-    // Diccionario de meses a dígitos
     const meses = {
       'enero': 1, 'febrero': 2, 'marzo': 3, 'abril': 4, 'mayo': 5, 'junio': 6,
       'julio': 7, 'agosto': 8, 'septiembre': 9, 'octubre': 10, 'noviembre': 11, 'diciembre': 12
     };
-
-    // Combina ambos para aceptar "20 de nueve" o "20 de septiembre"
     const mesesYNumeros = { ...meses, ...numeros };
-
-    // Patrón: (número o palabra) + (de / del) + (mes o número)
-    // Ejemplos que atrapa: "veinte de nueve", "20 del 9", "dos de octubre", "treinta y uno de diciembre"
     const regexFecha = /\b(\d{1,2}|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|dieciséis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintidós|veintitres|veintitrés|veinticuatro|veinticinco|veintiseis|veintiséis|veintisiete|veintiocho|veintinueve|treinta|treinta y uno)\s+(?:de|del)\s+(\d{1,2}|uno|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\b/gi;
 
-    return texto.replace(regexFecha, (match, dia, mes) => {
-      // Normalizamos a minúsculas y quitamos tildes para la búsqueda
-      const diaLimpio = dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      const mesLimpio = mes.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      
-      const d = numeros[diaLimpio] || dia;
-      const m = mesesYNumeros[mesLimpio] || mes;
-      
-      return `${d}/${m}`;
-    });
+    try {
+      return texto.replace(regexFecha, (match, dia, mes) => {
+        const diaLimpio = dia.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const mesLimpio = mes.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        const d = numeros[diaLimpio] || dia;
+        const m = mesesYNumeros[mesLimpio] || mes;
+        return `${d}/${m}`;
+      });
+    } catch(e) { return texto; }
+  }
+
+  function corregirErroresComunes(texto) {
+    const errores = [
+      { de: /\becho\b/gi, a: 'hecho' },
+      { de: /\bhalla\b/gi, a: 'haya' },
+      { de: /\bvalla\b/gi, a: 'vaya' },
+      { de: /\bhaber si\b/gi, a: 'a ver si' },
+      { de: /\bvamos haber\b/gi, a: 'vamos a ver' },
+      { de: /\buna ves\b/gi, a: 'una vez' },
+      { de: /\botra ves\b/gi, a: 'otra vez' },
+      { de: /\bcada ves\b/gi, a: 'cada vez' },
+      { de: /\baveces\b/gi, a: 'a veces' }
+    ];
+
+    try {
+      for (const { de, a } of errores) {
+        texto = texto.replace(de, (match) => {
+          if (match[0] === match[0].toUpperCase() && match[0] !== match[0].toLowerCase()) {
+            return a.charAt(0).toUpperCase() + a.slice(1);
+          }
+          return a;
+        });
+      }
+    } catch(e) {
+      // Si algo falla, devolvemos el texto original sin modificar
+    }
+    return texto;
   }
 
   function renderizarDictado() {
@@ -752,7 +740,7 @@
     btnMic.classList.add('recording');
     btnCancelarGrabacion.classList.add('show');
     btnPausar.classList.add('show');
-    btnPausar.textContent = '️ Pausar';
+    btnPausar.textContent = '⏸️ Pausar';
     btnPausar.style.background = '#f39c12';
     
     dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Dictado activo. Tocá el mic para finalizar.</span>';
@@ -771,7 +759,7 @@
     
     recognitionInstance.onstart = () => {
       btnMic.classList.add('recording');
-      if (dictando && !pausado) { dialogMeta.innerHTML = '<span class="estado-dictado">️ Escuchando...</span>'; }
+      if (dictando && !pausado) { dialogMeta.innerHTML = '<span class="estado-dictado">🎙️ Escuchando...</span>'; }
     };
 
     recognitionInstance.onresult = (event) => {
@@ -782,9 +770,7 @@
         if (!texto) continue;
 
         if (resultado.isFinal) {
-          // 1. Limpiamos fechas
           texto = normalizarFechas(texto);
-          // 2. Aplicamos el parche de errores comunes de voz
           texto = corregirErroresComunes(texto);
           
           const comando = esComandoExacto(texto.toLowerCase());
@@ -813,7 +799,7 @@
         setTimeout(() => {
           if (dictando && !pausado && !reinicioPendiente) {
             try { recognitionInstance.start(); } catch (e) {
-              dialogMeta.innerHTML = '<span class="estado-dictado">⚠️ Tocá el mic para continuar</span>';
+              dialogMeta.innerHTML = '<span class="estado-dictado">️ Tocá el mic para continuar</span>';
             }
           }
         }, 250);
@@ -902,8 +888,8 @@
     if (isEditing) { texto = dialogText.textContent; } 
     else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
     
-    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para leer'); return; }
-    if (!('speechSynthesis' in window)) { showToast('️ Tu navegador no soporta lectura en voz alta'); return; }
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('️ No hay texto para leer'); return; }
+    if (!('speechSynthesis' in window)) { showToast('⚠️ Tu navegador no soporta lectura en voz alta'); return; }
     
     texto = texto.replace(/([.,;:!?¿¡])/g, '$1 ');
     const conectores = ['y', 'pero', 'entonces', 'después', 'aunque', 'así que', 'sin embargo', 'porque', 'o'];
@@ -928,7 +914,7 @@
     const duracionEstimada = (texto.length / 15) * 1000 / utterance.rate;
     const timeoutSeguridad = setTimeout(() => { resetearBoton(); }, duracionEstimada + 5000);
     utterance.onend = () => { clearTimeout(timeoutSeguridad); resetearBoton(); };
-    utterance.onerror = () => { clearTimeout(timeoutSeguridad); resetearBoton(); showToast('️ Error al leer'); };
+    utterance.onerror = () => { clearTimeout(timeoutSeguridad); resetearBoton(); showToast('⚠️ Error al leer'); };
     
     window.speechSynthesis.speak(utterance);
     showToast('🔊 Leyendo en voz alta...');
@@ -941,14 +927,14 @@
     if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para copiar'); return; }
     if (navigator.clipboard && navigator.clipboard.writeText) {
       navigator.clipboard.writeText(texto).then(() => { showToast('📋 Texto copiado'); }).catch(() => { showToast('⚠️ Error al copiar'); });
-    } else { showToast('️ Tu navegador no soporta copiar'); }
+    } else { showToast('⚠️ Tu navegador no soporta copiar'); }
   }
 
   function compartirTexto() {
     let texto;
     if (isEditing) { texto = dialogText.textContent; } 
     else { const entrada = entradas.find(e => e.id === entradaActualId); texto = entrada ? entrada.contenido : dialogText.textContent; }
-    if (!texto || texto.includes("Presioná el micrófono")) { showToast('️ No hay texto para compartir'); return; }
+    if (!texto || texto.includes("Presioná el micrófono")) { showToast('⚠️ No hay texto para compartir'); return; }
     
     if (navigator.share) {
       navigator.share({ title: 'Escribo x mi', text: texto }).catch(() => {});
@@ -992,7 +978,7 @@
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
-    showToast(" Backup descargado");
+    showToast("💾 Backup descargado");
     document.getElementById('modalHerramientas').classList.remove('show');
   }
 
@@ -1028,7 +1014,7 @@
   function renderModalCategoria() {
     const visibles = getCategoriasVisibles();
     listaCategoriasElegir.innerHTML = visibles.map(cat => 
-      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')"> ${cat.nombre}</button>`
+      `<button class="btn-side" style="justify-content:flex-start; padding:12px;" onclick="seleccionarCategoria('${cat.nombre.replace(/'/g, "\\'")}')">🔵 ${cat.nombre}</button>`
     ).join('') || '<p style="color:#95a5a6; text-align:center; padding:12px;">No hay categorías visibles</p>';
 
     listaCategoriasGestionar.innerHTML = categorias.map((cat, idx) => 
@@ -1037,7 +1023,7 @@
         <div class="cat-item-acciones">
           <button class="cat-btn cat-btn-renombrar" onclick="renombrarCategoria(${idx})">✏️</button>
           <button class="cat-btn cat-btn-ocultar" onclick="toggleOcultarCategoria(${idx})">${cat.visible ? '👁️' : '👁️🗨️'}</button>
-          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">️</button>` : ''}
+          ${cat.nombre !== 'Personalizada' ? `<button class="cat-btn cat-btn-eliminar" onclick="eliminarCategoria(${idx})">🗑️</button>` : ''}
         </div>
       </div>`
     ).join('');
@@ -1143,14 +1129,10 @@
   btnCorregir.addEventListener('click', () => {
     if (isRecording) detenerDictadoPro();
     isEditing = !isEditing;
-    
-    // Activamos la edición y el corrector nativo del celular/navegador
     dialogText.contentEditable = isEditing;
-    dialogText.spellcheck = isEditing; // <--- ESTA LÍNEA ES LA CLAVE
-    
+    dialogText.spellcheck = isEditing;
     editBadge.classList.toggle('show', isEditing);
     btnListoEdicion.classList.toggle('show', isEditing);
-    
     if (isEditing) {
       const entrada = entradas.find(e => e.id === entradaActualId);
       if (entrada) dialogText.textContent = entrada.contenido || "";
@@ -1253,7 +1235,7 @@
         return `<div class="historial-item" onclick="cargarEntrada(${e.id})">
           <button class="btn-delete-historial" onclick="borrarEntradaHistorial(${e.id}, event)" title="Borrar">🗑️</button>
           <div class="historial-title">${e.titulo}</div>
-          <div class="historial-meta"> ${e.categoria} | 📅 ${fecha}</div>
+          <div class="historial-meta">📂 ${e.categoria} | 📅 ${fecha}</div>
           <div class="historial-text">${preview || '(Vacío)'}</div>
         </div>`;
       }).join('');
@@ -1303,131 +1285,131 @@
   }
   aplicarAjustes();
   actualizarVistaEntrada();
-// ===== NUBE ESCRIBO X MI (respaldo automático) =====
-const SUPA_URL='https://vqezdcdalprvjdtdrqzx.supabase.co';
-const SUPA_KEY='sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
-let supa=null, uid=null, nubeOK=false, nubeModo='off', nubeCambio=false;
-const _lsSet=localStorage.setItem.bind(localStorage);
-function nubeToast(msg){ let t=document.getElementById('nube-toast'); if(!t){ t=document.createElement('div'); t.id='nube-toast'; document.body.appendChild(t);} t.textContent=msg; t.classList.add('ver'); setTimeout(()=>t.classList.remove('ver'),3500); }
-(function(){ const st=document.createElement('style'); st.textContent='#nube{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube.tocable{cursor:pointer;text-decoration:underline;} #nube-form{display:none;text-align:center;margin:.4rem 0;} #nube-toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast.ver{opacity:1;}'; document.head.appendChild(st); })();
-const nubeEl=document.createElement('p'); nubeEl.id='nube';
-const nubeForm=document.createElement('div'); nubeForm.id='nube-form';
-nubeForm.innerHTML='<input id="nube-mail" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"><br><button id="nube-ok" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button> <button id="nube-new" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#27ae60;color:#fff;font-weight:700;font-size:1rem;">Crear cuenta</button>';
-const ancla=document.querySelector('.controls');
-if(ancla&&ancla.parentNode){ ancla.parentNode.insertBefore(nubeEl, ancla); ancla.parentNode.insertBefore(nubeForm, ancla); }
-function nubeEstado(txt,tocable){ nubeEl.textContent=txt; if(tocable){nubeEl.classList.add('tocable');}else{nubeEl.classList.remove('tocable');} }
-try{ if(window.supabase&&window.supabase.createClient){ supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true}}); } }catch(e){}
-function tomarSnapshot(){ const d={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('sb-')!==0&&k!=='nube_local_ts') d[k]=localStorage.getItem(k); } return d; }
-function clavesApp(d){ let n=0; for(const k in d){ n++; } return n; }
-function programarSubida(){ clearTimeout(window.__nubeT); window.__nubeT=setTimeout(()=>{ if(nubeCambio&&nubeOK){ nubeCambio=false; nubeSubir(true); } },6000); }
-localStorage.setItem=function(k,v){ _lsSet(k,v); if(k!=='nube_local_ts'&&k.indexOf('sb-')!==0){ nubeCambio=true; programarSubida(); } };
-async function nubeSubir(silencioso){
-  if(!nubeOK||!uid) return;
-  try{
-    await supa.from('respaldos_escribo').upsert({ user_id: uid, datos: tomarSnapshot(), actualizado_en: new Date().toISOString() });
-    _lsSet('nube_local_ts', String(Date.now()));
-    if(!silencioso) nubeToast('☁️ Respaldo guardado en la nube');
-  }catch(e){ console.log('[nube] subir falló', e); }
-}
-function aplicarRespaldo(datos, tNube){ for(const k in datos){ if(k.indexOf('sb-')===0) continue; _lsSet(k, datos[k]); } _lsSet('nube_local_ts', String(tNube)); }
-async function nubeTraerYDecidir(){
-  if(!nubeOK||!uid) return;
-  try{
-    const { data } = await supa.from('respaldos_escribo').select('datos, actualizado_en').eq('user_id', uid).limit(1);
-    if(!data||!data.length){ nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos'); await nubeSubir(true); return; }
-    const tNube=new Date(data[0].actualizado_en).getTime();
-    const tLocal=parseInt(localStorage.getItem('nube_local_ts')||'0',10)||0;
-    if(clavesApp(tomarSnapshot())===0){
-      aplicarRespaldo(data[0].datos, tNube);
-      nubeToast('☁️ Tus escritos volvieron de la nube');
-      setTimeout(()=>location.reload(), 1500);
+
+  // ===== NUBE ESCRIBO X MI (respaldo automático) =====
+  const SUPA_URL='https://vqezdcdalprvjdtdrqzx.supabase.co';
+  const SUPA_KEY='sb_publishable_5RI8bz70kqj7H2TIX6H8uQ_LlZnQtKO';
+  let supa=null, uid=null, nubeOK=false, nubeModo='off', nubeCambio=false;
+  const _lsSet=localStorage.setItem.bind(localStorage);
+  function nubeToast(msg){ let t=document.getElementById('nube-toast'); if(!t){ t=document.createElement('div'); t.id='nube-toast'; document.body.appendChild(t);} t.textContent=msg; t.classList.add('ver'); setTimeout(()=>t.classList.remove('ver'),3500); }
+  (function(){ const st=document.createElement('style'); st.textContent='#nube{text-align:center;font-size:.8rem;color:#6b7280;min-height:1.1rem;margin:.2rem 0;} #nube.tocable{cursor:pointer;text-decoration:underline;} #nube-form{display:none;text-align:center;margin:.4rem 0;} #nube-toast{position:fixed;bottom:5rem;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:.6rem 1.2rem;border-radius:2rem;font-size:.9rem;font-weight:600;opacity:0;transition:opacity .4s;z-index:999;pointer-events:none;} #nube-toast.ver{opacity:1;}'; document.head.appendChild(st); })();
+  const nubeEl=document.createElement('p'); nubeEl.id='nube';
+  const nubeForm=document.createElement('div'); nubeForm.id='nube-form';
+  nubeForm.innerHTML='<input id="nube-mail" type="email" placeholder="Tu email" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;margin-bottom:.3rem;"><br><input id="nube-pass" type="password" placeholder="Contraseña de la nube" style="font-size:1.05rem;padding:.6rem;border-radius:.7rem;border:2px solid #ddd6fe;width:60%;"><br><button id="nube-ok" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#7c3aed;color:#fff;font-weight:700;font-size:1rem;">Entrar</button> <button id="nube-new" style="margin-top:.4rem;padding:.6rem .9rem;border:none;border-radius:.7rem;background:#27ae60;color:#fff;font-weight:700;font-size:1rem;">Crear cuenta</button>';
+  const ancla=document.querySelector('.controls');
+  if(ancla&&ancla.parentNode){ ancla.parentNode.insertBefore(nubeEl, ancla); ancla.parentNode.insertBefore(nubeForm, ancla); }
+  function nubeEstado(txt,tocable){ nubeEl.textContent=txt; if(tocable){nubeEl.classList.add('tocable');}else{nubeEl.classList.remove('tocable');} }
+  try{ if(window.supabase&&window.supabase.createClient){ supa=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true}}); } }catch(e){}
+  function tomarSnapshot(){ const d={}; for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.indexOf('sb-')!==0&&k!=='nube_local_ts') d[k]=localStorage.getItem(k); } return d; }
+  function clavesApp(d){ let n=0; for(const k in d){ n++; } return n; }
+  function programarSubida(){ clearTimeout(window.__nubeT); window.__nubeT=setTimeout(()=>{ if(nubeCambio&&nubeOK){ nubeCambio=false; nubeSubir(true); } },6000); }
+  localStorage.setItem=function(k,v){ _lsSet(k,v); if(k!=='nube_local_ts'&&k.indexOf('sb-')!==0){ nubeCambio=true; programarSubida(); } };
+  async function nubeSubir(silencioso){
+    if(!nubeOK||!uid) return;
+    try{
+      await supa.from('respaldos_escribo').upsert({ user_id: uid, datos: tomarSnapshot(), actualizado_en: new Date().toISOString() });
+      _lsSet('nube_local_ts', String(Date.now()));
+      if(!silencioso) nubeToast('☁️ Respaldo guardado en la nube');
+    }catch(e){ console.log('[nube] subir falló', e); }
+  }
+  function aplicarRespaldo(datos, tNube){ for(const k in datos){ if(k.indexOf('sb-')===0) continue; _lsSet(k, datos[k]); } _lsSet('nube_local_ts', String(tNube)); }
+  async function nubeTraerYDecidir(){
+    if(!nubeOK||!uid) return;
+    try{
+      const { data } = await supa.from('respaldos_escribo').select('datos, actualizado_en').eq('user_id', uid).limit(1);
+      if(!data||!data.length){ nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos'); await nubeSubir(true); return; }
+      const tNube=new Date(data[0].actualizado_en).getTime();
+      const tLocal=parseInt(localStorage.getItem('nube_local_ts')||'0',10)||0;
+      if(clavesApp(tomarSnapshot())===0){
+        aplicarRespaldo(data[0].datos, tNube);
+        nubeToast('️ Tus escritos volvieron de la nube');
+        setTimeout(()=>location.reload(), 1500);
+        return;
+      }
+      if(tNube>tLocal+2000){
+        nubeModo='restaurar';
+        window.__nubeDatos=data[0].datos; window.__nubeTs=tNube;
+        nubeEstado('☁️ Hay un respaldo más nuevo en la nube — tocá para traerlo', true);
+      } else {
+        nubeModo='ok';
+        nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos');
+      }
+    }catch(e){ nubeEstado('☁️ Nube conectada (sin respaldo aún)'); }
+  }
+  async function nubeRescatarToken(){
+    if(!supa) return;
+    try{
+      const h=window.location.hash||'';
+      if(h.includes('access_token=')){
+        const p=new URLSearchParams(h.substring(1));
+        const at=p.get('access_token'); const rt=p.get('refresh_token');
+        if(at){ await supa.auth.setSession({ access_token: at, refresh_token: rt||at }); }
+      }
+      const code=new URLSearchParams(window.location.search).get('code');
+      if(code){ await supa.auth.exchangeCodeForSession(code); }
+      if(h.includes('access_token=')||code){ history.replaceState(null,'',window.location.pathname); }
+    }catch(e){ console.log('[nube] rescate', e); }
+  }
+  async function nubeConectar(){
+    if(!supa){ nubeEstado('️ Sin nube: todo queda en este celu'); return; }
+    try{
+      const { data: ses } = await supa.auth.getSession();
+      if(ses&&ses.session){ uid=ses.session.user.id; nubeOK=true; await nubeTraerYDecidir(); }
+      else { uid=null; nubeOK=false; nubeModo='off'; nubeEstado('☁️ Nube apagada — tocá acá para activarla', true); }
+    }catch(e){ nubeOK=false; nubeEstado('⚠️ Sin nube: todo queda en este celu'); }
+  }
+  nubeEl.addEventListener('click', ()=>{
+    if(nubeModo==='restaurar'){
+      if(confirm('¿Traer el respaldo más nuevo desde la nube? Se reemplaza lo de este celu.')){
+        aplicarRespaldo(window.__nubeDatos, window.__nubeTs);
+        nubeToast('☁️ Respaldo restaurado');
+        setTimeout(()=>location.reload(), 1500);
+      }
       return;
     }
-    if(tNube>tLocal+2000){
-      nubeModo='restaurar';
-      window.__nubeDatos=data[0].datos; window.__nubeTs=tNube;
-      nubeEstado('☁️ Hay un respaldo más nuevo en la nube — tocá para traerlo', true);
-    } else {
-      nubeModo='ok';
-      nubeEstado('☁️ Nube conectada: tus escritos se respaldan solos');
-    }
-  }catch(e){ nubeEstado('☁️ Nube conectada (sin respaldo aún)'); }
-}
-async function nubeRescatarToken(){
-  if(!supa) return;
-  try{
-    const h=window.location.hash||'';
-    if(h.includes('access_token=')){
-      const p=new URLSearchParams(h.substring(1));
-      const at=p.get('access_token'); const rt=p.get('refresh_token');
-      if(at){ await supa.auth.setSession({ access_token: at, refresh_token: rt||at }); }
-    }
-    const q=new URLSearchParams(window.location.search);
-    const code=q.get('code');
-    if(code){ await supa.auth.exchangeCodeForSession(code); }
-    if(h.includes('access_token=')||code){ history.replaceState(null,'',window.location.pathname); }
-  }catch(e){ console.log('[nube] rescate', e); }
-}
-async function nubeConectar(){
-  if(!supa){ nubeEstado('⚠️ Sin nube: todo queda en este celu'); return; }
-  try{
-    const { data: ses } = await supa.auth.getSession();
-    if(ses&&ses.session){ uid=ses.session.user.id; nubeOK=true; await nubeTraerYDecidir(); }
-    else { uid=null; nubeOK=false; nubeModo='off'; nubeEstado('☁️ Nube apagada — tocá acá para activarla', true); }
-  }catch(e){ nubeOK=false; nubeEstado('⚠️ Sin nube: todo queda en este celu'); }
-}
-nubeEl.addEventListener('click', ()=>{
-  if(nubeModo==='restaurar'){
-    if(confirm('¿Traer el respaldo más nuevo desde la nube? Se reemplaza lo de este celu.')){
-      aplicarRespaldo(window.__nubeDatos, window.__nubeTs);
-      nubeToast('☁️ Respaldo restaurado');
-      setTimeout(()=>location.reload(), 1500);
-    }
-    return;
-  }
-  if(nubeOK){ nubeToast('☁️ La nube ya está conectada'); return; }
-  if(!supa){ nubeToast('Nube no disponible en este navegador'); return; }
-  nubeForm.style.display=(nubeForm.style.display==='none')?'block':'none';
-});
-document.getElementById('nube-ok').addEventListener('click', async ()=>{
-  const mail=(document.getElementById('nube-mail').value||'').trim();
-  const pass=(document.getElementById('nube-pass').value||'');
-  if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
-  if(!pass){ nubeToast('Escribí tu contraseña'); return; }
-  try{
-    const { error } = await supa.auth.signInWithPassword({ email: mail, password: pass });
-    if(error) throw error;
-    nubeToast('☁️ Conectado a la nube');
-    nubeForm.style.display='none';
-    await nubeTraerYDecidir();
-  }catch(e){ nubeToast('⚠️ '+(e&&e.message?e.message:'No se pudo entrar')); }
-});
-document.getElementById('nube-new').addEventListener('click', async ()=>{
-  const mail=(document.getElementById('nube-mail').value||'').trim();
-  const pass=(document.getElementById('nube-pass').value||'');
-  if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
-  if(pass.length<6){ nubeToast('La contraseña necesita 6 caracteres o más'); return; }
-  try{
-    const { data, error } = await supa.auth.signUp({ email: mail, password: pass });
-    if(error) throw error;
-    if(data && data.session){
-      uid=data.session.user.id; nubeOK=true;
-      nubeToast('☁️ Cuenta creada y conectada');
+    if(nubeOK){ nubeToast('☁️ La nube ya está conectada'); return; }
+    if(!supa){ nubeToast('Nube no disponible en este navegador'); return; }
+    nubeForm.style.display=(nubeForm.style.display==='none')?'block':'none';
+  });
+  document.getElementById('nube-ok').addEventListener('click', async ()=>{
+    const mail=(document.getElementById('nube-mail').value||'').trim();
+    const pass=(document.getElementById('nube-pass').value||'');
+    if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
+    if(!pass){ nubeToast('Escribí tu contraseña'); return; }
+    try{
+      const { error } = await supa.auth.signInWithPassword({ email: mail, password: pass });
+      if(error) throw error;
+      nubeToast('☁️ Conectado a la nube');
       nubeForm.style.display='none';
-      await nubeSubir(true);
       await nubeTraerYDecidir();
-    } else {
-      nubeToast('Cuenta creada: ahora tocá Entrar');
+    }catch(e){ nubeToast('⚠️ '+(e&&e.message?e.message:'No se pudo entrar')); }
+  });
+  document.getElementById('nube-new').addEventListener('click', async ()=>{
+    const mail=(document.getElementById('nube-mail').value||'').trim();
+    const pass=(document.getElementById('nube-pass').value||'');
+    if(!mail||!mail.includes('@')){ nubeToast('Escribí un email válido'); return; }
+    if(pass.length<6){ nubeToast('La contraseña necesita 6 caracteres o más'); return; }
+    try{
+      const { data, error } = await supa.auth.signUp({ email: mail, password: pass });
+      if(error) throw error;
+      if(data && data.session){
+        uid=data.session.user.id; nubeOK=true;
+        nubeToast('☁️ Cuenta creada y conectada');
+        nubeForm.style.display='none';
+        await nubeSubir(true);
+        await nubeTraerYDecidir();
+      } else {
+        nubeToast('Cuenta creada: ahora tocá Entrar');
+      }
+    }catch(e){
+      const m=(e&&e.message)||'';
+      if(/already registered/i.test(m)){ nubeToast('Ese mail ya tiene cuenta: tocá Entrar'); }
+      else { nubeToast('⚠️ '+(m||'No se pudo crear')); }
     }
-  }catch(e){
-    const m=(e&&e.message)||'';
-    if(/already registered/i.test(m)){ nubeToast('Ese mail ya tiene cuenta: tocá Entrar'); }
-    else { nubeToast('⚠️ '+(m||'No se pudo crear')); }
-  }
-});
-if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
-window.addEventListener('online', ()=>{ nubeConectar(); });
-nubeRescatarToken().then(()=>{ nubeConectar(); setTimeout(()=>nubeConectar(),2500); setTimeout(()=>nubeConectar(),7000); });
+  });
+  if(supa){ supa.auth.onAuthStateChange((ev,ses)=>{ if(ses&&ses.user){ uid=ses.user.id; nubeOK=true; nubeTraerYDecidir(); } }); }
+  window.addEventListener('online', ()=>{ nubeConectar(); });
+  nubeRescatarToken().then(()=>{ nubeConectar(); setTimeout(()=>nubeConectar(),2500); setTimeout(()=>nubeConectar(),7000); });
 </script>
 
 </body>
